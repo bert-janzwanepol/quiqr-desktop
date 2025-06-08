@@ -23,9 +23,9 @@ class CopyDialog extends React.Component{
       siteconf: {}
     }
   }
-  componentWillUpdate(nextProps, nextState) {
-    if(this.props.siteconf.key !== nextProps.siteconf.key){
-      let siteconf = Object.assign({}, nextProps.siteconf);
+  componentDidUpdate(prevProps, prevState) {
+    if(prevProps.siteconf.key !== this.props.siteconf.key){
+      let siteconf = Object.assign({}, this.props.siteconf);
       siteconf.name = siteconf.name + " (copy)";
       this.setState({siteconf: siteconf, execButtonsDisabled: false});
     }

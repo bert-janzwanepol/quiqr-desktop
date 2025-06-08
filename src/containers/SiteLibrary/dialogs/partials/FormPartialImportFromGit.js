@@ -195,12 +195,12 @@ class FormPartialNewFromScratch extends React.Component{
 
   }
 
-  componentWillUpdate(nextProps, nextState) {
-    if(this.state.importTypeGitUrl !== nextProps.importSiteURL && nextProps.importSiteURL ){
-      this.setState({importTypeGitUrl: nextProps.importSiteURL},
+  componentDidUpdate(prevProps, prevState) {
+    if(this.state.importTypeGitUrl !== this.props.importSiteURL && this.props.importSiteURL && prevProps.importSiteURL !== this.props.importSiteURL){
+      this.setState({importTypeGitUrl: this.props.importSiteURL},
         ()=>{
-          if(this.preValidateURL(nextProps.importSiteURL)){
-            this.validateURL(nextProps.importSiteURL);
+          if(this.preValidateURL(this.props.importSiteURL)){
+            this.validateURL(this.props.importSiteURL);
           }
         }
       );

@@ -116,29 +116,29 @@ class SiteLibraryRouted extends React.Component{
 
   }
 
-  componentWillUpdate(nextProps, nextState) {
+  componentDidUpdate(prevProps, prevState) {
 
-    if(this.props.newSite !== nextProps.newSite){
+    if(prevProps.newSite !== this.props.newSite){
       this.setState({
         dialogNewSlashImportSite: {
-          open: nextProps.newSite,
+          open: this.props.newSite,
           newOrImport: 'new',
         }
       });
     }
 
-    if(this.props.importSite !== nextProps.importSite){
+    if(prevProps.importSite !== this.props.importSite){
       this.setState({
         dialogNewSlashImportSite: {
-          open: nextProps.importSite,
+          open: this.props.importSite,
           newOrImport: 'import',
         }
       });
     }
 
-    if(nextProps.importSiteURL && this.props.importSiteURL !== nextProps.importSiteURL){
+    if(this.props.importSiteURL && prevProps.importSiteURL !== this.props.importSiteURL){
       this.setState({
-        importSiteURL: nextProps.importSiteURL
+        importSiteURL: this.props.importSiteURL
       });
     }
 

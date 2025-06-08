@@ -23,11 +23,11 @@ class EditTagsDialogs extends React.Component{
       siteconf: {}
     }
   }
-  componentWillUpdate(nextProps, nextState) {
-    if(this.props.siteconf.key !== nextProps.siteconf.key){
-      let siteconf = nextProps.siteconf;
+  componentDidUpdate(prevProps, prevState) {
+    if(prevProps.siteconf.key !== this.props.siteconf.key){
+      let siteconf = this.props.siteconf;
       if(!siteconf.tags) siteconf.tags = [];
-      this.setState({siteconf: nextProps.siteconf, execButtonsDisabled: true});
+      this.setState({siteconf: this.props.siteconf, execButtonsDisabled: true});
     }
   }
 

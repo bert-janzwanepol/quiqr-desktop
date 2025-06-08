@@ -92,8 +92,8 @@ class NewSiteDialog extends React.Component{
     }
   }
 
-  componentWillUpdate(nextProps, nextState) {
-    if(nextProps.importSiteURL && this.props.importSiteURL !== nextProps.importSiteURL){
+  componentDidUpdate(prevProps, prevState) {
+    if(this.props.importSiteURL && prevProps.importSiteURL !== this.props.importSiteURL){
       this.setState({
         newType: 'git',
       });

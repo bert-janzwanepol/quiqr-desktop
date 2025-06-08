@@ -21,10 +21,10 @@ class SplashDialog extends React.Component{
     this.setState({showSplashAtStartup: this.props.showSplashAtStartup})
   }
 
-  componentWillUpdate(nextProps, nextState) {
+  componentDidUpdate(prevProps, prevState) {
 
-    if(this.props.showSplashAtStartup !== nextProps.showSplashAtStartup){
-      this.setState({showSplashAtStartup: nextProps.showSplashAtStartup})
+    if(prevProps.showSplashAtStartup !== this.props.showSplashAtStartup){
+      this.setState({showSplashAtStartup: this.props.showSplashAtStartup})
     }
   }
 
