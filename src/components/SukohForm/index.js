@@ -1,7 +1,7 @@
 import * as React                  from 'react';
 import { Form, ComponentRegistry } from '../HoForm';
-import Fab                         from '@material-ui/core/Fab';
-import CheckIcon                   from '@material-ui/icons/Check';
+import Fab                         from '@mui/material/Fab';
+import CheckIcon                   from '@mui/icons-material/Check';
 import dynamicFormComponents       from './components/all'
 import service                     from './../../services/service'
 

@@ -1,18 +1,18 @@
 import * as React              from 'react';
 import { Route }               from 'react-router-dom'
-import IconButton              from '@material-ui/core/IconButton';
-import CircularProgress        from '@material-ui/core/CircularProgress';
-import OpenInBrowserIcon       from '@material-ui/icons/OpenInBrowser';
-import DescriptionIcon         from '@material-ui/icons/Description';
-import ArrowBackIcon           from '@material-ui/icons/ArrowBack';
-import Button                  from '@material-ui/core/Button';
-import Box                     from '@material-ui/core/Box';
+import IconButton              from '@mui/material/IconButton';
+import CircularProgress        from '@mui/material/CircularProgress';
+import OpenInBrowserIcon       from '@mui/icons-material/OpenInBrowser';
+import DescriptionIcon         from '@mui/icons-material/Description';
+import ArrowBackIcon           from '@mui/icons-material/ArrowBack';
+import Button                  from '@mui/material/Button';
+import Box                     from '@mui/material/Box';
 import { ComponentContext }    from './component-context';
 import { Debounce }            from './debounce';
 import { FormStateBuilder }    from './form-state-builder';
 import service                 from '../../services/service';
 import {snackMessageService}   from '../../services/ui-service';
-import CloseIcon               from '@material-ui/icons/Close';
+import CloseIcon               from '@mui/icons-material/Close';
 import { FormBreadcumb }       from '../Breadcumb';
 import { FieldsExtender }      from './fields-extender';
 
@@ -369,7 +369,7 @@ class Form extends React.Component {
             onClick={()=>{
               snackMessageService.reportSnackDismiss()
             }}
-          >
+            size="large">
             <CloseIcon />
           </IconButton>
         </React.Fragment>
@@ -395,8 +395,7 @@ class Form extends React.Component {
     let backButton = undefined;
     if( this.props.collectionKey){
       backButton = (
-        <IconButton aria-label="back"
-          onClick={()=>{this.handleBackButton();}}>
+        <IconButton aria-label="back" onClick={()=>{this.handleBackButton();}} size="large">
           <ArrowBackIcon />
         </IconButton>
       );

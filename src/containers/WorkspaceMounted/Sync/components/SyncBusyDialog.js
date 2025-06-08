@@ -1,14 +1,15 @@
 import * as React           from 'react';
-import { withStyles }       from '@material-ui/core/styles';
-import Button               from '@material-ui/core/Button';
-import Box                  from '@material-ui/core/Box';
-import MuiDialogTitle       from '@material-ui/core/DialogTitle';
-import Typography           from '@material-ui/core/Typography';
-import Dialog               from '@material-ui/core/Dialog';
-import DialogActions        from '@material-ui/core/DialogActions';
-import DialogContent        from '@material-ui/core/DialogContent';
-import DialogContentText    from '@material-ui/core/DialogContentText';
-import LinearProgress       from '@material-ui/core/LinearProgress';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
+import Button               from '@mui/material/Button';
+import Box                  from '@mui/material/Box';
+import MuiDialogTitle       from '@mui/material/DialogTitle';
+import Typography           from '@mui/material/Typography';
+import Dialog               from '@mui/material/Dialog';
+import DialogActions        from '@mui/material/DialogActions';
+import DialogContent        from '@mui/material/DialogContent';
+import DialogContentText    from '@mui/material/DialogContentText';
+import LinearProgress       from '@mui/material/LinearProgress';
 
 const useStyles = theme => ({
 
@@ -74,4 +75,6 @@ class SyncBusyDialog extends React.Component{
   }
 }
 
-export default withStyles(useStyles)(SyncBusyDialog);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+// export default withStyles(useStyles)(SyncBusyDialog);
+export default SyncBusyDialog;

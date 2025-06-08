@@ -1,5 +1,5 @@
 import * as React        from 'react';
-import FolderIcon from '@material-ui/icons/Folder';
+import FolderIcon from '@mui/icons-material/Folder';
 export default class Meta {
 
   static configDialogTitle = "Folder Export Target";

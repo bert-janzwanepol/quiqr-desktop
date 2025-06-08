@@ -1,9 +1,10 @@
 import React          from 'react';
 import service        from './../../services/service';
-import Typography     from '@material-ui/core/Typography';
-import TextField      from '@material-ui/core/TextField';
+import Typography     from '@mui/material/Typography';
+import TextField      from '@mui/material/TextField';
 
-import { withStyles } from '@material-ui/core/styles';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
 
 const useStyles = theme => ({
 
@@ -112,4 +113,5 @@ class PrefsAdvanced extends React.Component {
 
 }
 
-export default withStyles(useStyles)(PrefsAdvanced);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+export default PrefsAdvanced;

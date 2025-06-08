@@ -2,7 +2,7 @@ import * as React from 'react';
 import DefaultWrapper from './shared/DefaultWrapper';
 import FormItemWrapper from './shared/FormItemWrapper';
 import Tip from '../../Tip';
-import { ColorPicker } from 'material-ui-color';
+import { MuiColorInput } from 'mui-color-input';
 import { BaseDynamic } from '../../HoForm';
 //import service                              from './../../../services/service'
 
@@ -28,13 +28,13 @@ class ColorToolDynamic extends BaseDynamic {
     return 'color';
   }
 
-  handleChange = (e, _)=>{
+  handleChange = (color)=>{
     let {context} = this.props;
     let {node} = context;
     let {field} = node;
 
-    if(e && e.css && e.css.backgroundColor){
-      context.setValue(e.css.backgroundColor, 250);
+    if(color){
+      context.setValue(color, 250);
 
       if(field.autoSave === true){
         context.saveFormHandler();
@@ -75,12 +75,10 @@ class ColorToolDynamic extends BaseDynamic {
               userSelect: 'none',
                }}>{field.title}</label>
 
-            <ColorPicker
-            value={context.value}
-            deferred
-            palette={palette}
+            <MuiColorInput
+            value={context.value || '#000000'}
             onChange={ this.handleChange }
-
+            format="hex"
           />
             </DefaultWrapper>
           </React.Fragment>

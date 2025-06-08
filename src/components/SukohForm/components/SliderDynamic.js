@@ -1,9 +1,9 @@
 import * as React from 'react';
 import FormItemWrapper from './shared/FormItemWrapper';
 import DefaultWrapper from './shared/DefaultWrapper';
-import Slider from '@material-ui/core/Slider';
+import Slider from '@mui/material/Slider';
 import Tip from '../../Tip';
-import Typography from '@material-ui/core/Typography';
+import Typography from '@mui/material/Typography';
 import { BaseDynamic } from '../../HoForm';
 //import service                              from './../../../services/service'
 

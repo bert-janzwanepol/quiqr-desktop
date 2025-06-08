@@ -1,14 +1,14 @@
 import React                    from 'react';
 import type {FormStateBuilder } from '../../HoForm';
 import { BaseDynamic }          from '../../HoForm';
-import Typography               from '@material-ui/core/Typography';
+import Typography               from '@mui/material/Typography';
 import FormItemWrapper          from './shared/FormItemWrapper';
 import Tip                      from '../../Tip';
 import service                  from '../../../services/service';
 
-import TextField from '@material-ui/core/TextField';
-import Box from '@material-ui/core/Box';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import TextField from '@mui/material/TextField';
+import Box from '@mui/material/Box';
+import Autocomplete from '@mui/material/Autocomplete';
 
 type SelectFromQueryDynamicField = {
   key: string,

@@ -1,6 +1,6 @@
 import React                     from 'react';
 import FormItemWrapper           from './shared/FormItemWrapper';
-import TextField                 from '@material-ui/core/TextField';
+import TextField                 from '@mui/material/TextField';
 import Tip                       from '../../Tip';
 import { BaseDynamic }           from '../../HoForm';
 

@@ -1,20 +1,21 @@
 import React from 'react';
-import AiIcon   from '@material-ui/icons/Memory';
-import IconButton from '@material-ui/core/IconButton';
-import Button            from '@material-ui/core/Button';
+import AiIcon   from '@mui/icons-material/Memory';
+import IconButton from '@mui/material/IconButton';
+import Button            from '@mui/material/Button';
 import service           from '../services/service';
-import TextField            from '@material-ui/core/TextField';
-import Box                  from '@material-ui/core/Box';
-import Dialog               from '@material-ui/core/Dialog';
-import DialogActions        from '@material-ui/core/DialogActions';
-import DialogContent        from '@material-ui/core/DialogContent';
-import DialogTitle          from '@material-ui/core/DialogTitle';
-import FormControl         from '@material-ui/core/FormControl';
-import MenuItem            from '@material-ui/core/MenuItem';
-import Select              from '@material-ui/core/Select';
-import InputLabel          from '@material-ui/core/InputLabel';
-import { withStyles }      from '@material-ui/core/styles';
-import CircularProgress           from '@material-ui/core/CircularProgress';
+import TextField            from '@mui/material/TextField';
+import Box                  from '@mui/material/Box';
+import Dialog               from '@mui/material/Dialog';
+import DialogActions        from '@mui/material/DialogActions';
+import DialogContent        from '@mui/material/DialogContent';
+import DialogTitle          from '@mui/material/DialogTitle';
+import FormControl         from '@mui/material/FormControl';
+import MenuItem            from '@mui/material/MenuItem';
+import Select              from '@mui/material/Select';
+import InputLabel          from '@mui/material/InputLabel';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
+import CircularProgress           from '@mui/material/CircularProgress';
 
 import OpenAI from 'openai';
 
@@ -155,7 +156,7 @@ class AiAssist extends React.Component {
         <Box my={3} sx={{display:'flex'}}>
           <TextField
             fullWidth
-            className={classes.textfield}
+            // TODO: Add sx prop - className={classes.textfield}
             readOnly
             disabled={this.props.inValue===""}
             id="standard-full-width"
@@ -167,7 +168,7 @@ class AiAssist extends React.Component {
 
         <Box my={0} sx={{display:'flex'}}>
 
-          <FormControl variant="outlined" className={classes.formControl}>
+          <FormControl variant="outlined" /* TODO: Add sx prop - className={classes.formControl} */>
             <InputLabel id="demo-simple-select-outlined-label">Run AI Assist with text</InputLabel>
             <Select
               labelId="demo-simple-select-outlined-label"
@@ -214,7 +215,7 @@ class AiAssist extends React.Component {
           </FormControl>
 
           <TextField
-              className={classes.textfield}
+              // TODO: Add sx prop - className={classes.textfield}
             fullWidth
             id="standard-full-width"
             label="Command Prompt"
@@ -229,7 +230,7 @@ class AiAssist extends React.Component {
         </Box>
 
         <Box my={0} sx={{display:'flex'}}>
-            <Button className={classes.keyButton} onClick={()=>{this.sendToAssistent()}} disabled={this.state.assistendNotReady} color="primary" variant="contained">Send prompt to AI assistent</Button>
+            <Button /* TODO: Add sx prop - className={classes.keyButton} */ onClick={()=>{this.sendToAssistent()}} disabled={this.state.assistendNotReady} color="primary" variant="contained">Send prompt to AI assistent</Button>
             { (this.state.aiBusy ?
               <React.Fragment>&nbsp;<CircularProgress size={24} />&nbsp;</React.Fragment>
               :
@@ -240,7 +241,7 @@ class AiAssist extends React.Component {
         <Box my={3} sx={{display:'flex'}}>
           <TextField
             fullWidth
-            className={classes.textfield}
+            // TODO: Add sx prop - className={classes.textfield}
             multiline
             id="standard-full-width"
             label="Result Text"
@@ -291,10 +292,13 @@ class AiAssist extends React.Component {
     return (
       <span style={{display:'inline-block', position:'relative', cursor: 'default'}}>
         {this.renderDialog()}
-        <IconButton aria-label="AI-assist" onClick={
-          ()=>{
-          this.handleClick();
-          }}>
+        <IconButton
+          aria-label="AI-assist"
+          onClick={
+            ()=>{
+            this.handleClick();
+            }}
+          size="large">
           <AiIcon />
         </IconButton>
       </span>
@@ -302,4 +306,5 @@ class AiAssist extends React.Component {
   }
 }
 
-export default withStyles(useStyles)(AiAssist);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+export default AiAssist;

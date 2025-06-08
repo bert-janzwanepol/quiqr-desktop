@@ -1,15 +1,16 @@
 import React           from 'react';
 import { Route }            from 'react-router-dom';
 import service         from './../../../services/service';
-import Typography      from '@material-ui/core/Typography';
-import { withStyles }  from '@material-ui/core/styles';
-import TextField       from '@material-ui/core/TextField';
-import IconButton      from '@material-ui/core/IconButton';
-import DescriptionIcon from '@material-ui/icons/Description';
-import Grid            from '@material-ui/core/Grid';
-import Box             from '@material-ui/core/Box';
-import FolderIcon from '@material-ui/icons/Folder';
-import BallotIcon from '@material-ui/icons/Ballot';
+import Typography      from '@mui/material/Typography';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
+import TextField       from '@mui/material/TextField';
+import IconButton      from '@mui/material/IconButton';
+import DescriptionIcon from '@mui/icons-material/Description';
+import Grid            from '@mui/material/Grid';
+import Box             from '@mui/material/Box';
+import FolderIcon from '@mui/icons-material/Folder';
+import BallotIcon from '@mui/icons-material/Ballot';
 
 
 const useStyles = theme => ({
@@ -100,15 +101,19 @@ class SiteConfRouteModel extends React.Component {
 
     if(item.filename && item.filename.includes("/quiqr/model/includes/menu.yaml")){
       return (
-        <IconButton color="primary" className={classes.iconButton} aria-label="directions"
+        <IconButton
+          color="primary"
+          className={classes.iconButton}
+          aria-label="directions"
           onClick={()=>{
             let fileBaseName = item.filename.split('/').reverse()[0];
             history.push(`${basePath}/dogfoodIncludesMenu/${fileBaseName}`)
 
-          }}>
+          }}
+          size="large">
           {(item.icon ? item.icon : <BallotIcon />)}
         </IconButton>
-      )
+      );
     }
     return null
 
@@ -126,7 +131,6 @@ class SiteConfRouteModel extends React.Component {
     return (
       <Box m={2}>
         <Typography variant="h6">{title}</Typography>
-
         <div className={classes.root}>
 
           {files.map((item, index)=>{
@@ -147,22 +151,25 @@ class SiteConfRouteModel extends React.Component {
                 </Grid>
                 <Grid item xs={1}>
 
-                  <IconButton color="primary" className={classes.iconButton} aria-label="directions"
+                  <IconButton
+                    color="primary"
+                    className={classes.iconButton}
+                    aria-label="directions"
                     onClick={()=>{
                       service.api.openFileInEditor(item.filename);
 
-                    }}>
+                    }}
+                    size="large">
                     {(item.icon ? item.icon : <DescriptionIcon />)}
                   </IconButton>
                   {this.renderDogFoodIcon(item,history)}
                 </Grid>
               </Grid>
-            )
+            );
           })}
         </div>
-
       </Box>
-    )
+    );
   }
 
   render(){
@@ -198,4 +205,6 @@ class SiteConfRouteModel extends React.Component {
   }
 }
 
-export default withStyles(useStyles)(SiteConfRouteModel);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+// export default withStyles(useStyles)(SiteConfRouteModel);
+export default SiteConfRouteModel;

@@ -2,17 +2,17 @@ import * as React       from 'react';
 import { Route }        from 'react-router-dom';
 import Sidebar          from './../../Sidebar';
 import service          from './../../../services/service';
-import AddIcon          from '@material-ui/icons/Add';
-import IconButton       from '@material-ui/core/IconButton';
-import MoreVertIcon     from '@material-ui/icons/MoreVert';
-import Menu             from '@material-ui/core/Menu';
-import MenuItem         from '@material-ui/core/MenuItem';
+import AddIcon          from '@mui/icons-material/Add';
+import IconButton       from '@mui/material/IconButton';
+import MoreVertIcon     from '@mui/icons-material/MoreVert';
+import Menu             from '@mui/material/Menu';
+import MenuItem         from '@mui/material/MenuItem';
 import SyncConfigDialog from './components/SyncConfigDialog';
-import Button           from '@material-ui/core/Button';
-import Dialog           from '@material-ui/core/Dialog';
-import DialogActions    from '@material-ui/core/DialogActions';
-import DialogTitle      from '@material-ui/core/DialogTitle';
-import DialogContent    from '@material-ui/core/DialogContent';
+import Button           from '@mui/material/Button';
+import Dialog           from '@mui/material/Dialog';
+import DialogActions    from '@mui/material/DialogActions';
+import DialogTitle      from '@mui/material/DialogTitle';
+import DialogContent    from '@mui/material/DialogContent';
 //targets
 import {Meta as GitHubMeta}   from './syncTypes/github'
 import {Meta as FolderMeta}   from './syncTypes/folder'
@@ -73,12 +73,16 @@ export class SyncSidebar extends React.Component {
   renderButton(index,publ){
 
     return (
-      <IconButton edge="end" aria-label="comments" onClick={(e)=>{
-        this.setState({anchorEl:e.currentTarget, menuOpen:index})
-      }}>
+      <IconButton
+        edge="end"
+        aria-label="comments"
+        onClick={(e)=>{
+          this.setState({anchorEl:e.currentTarget, menuOpen:index})
+        }}
+        size="large">
         <MoreVertIcon />
       </IconButton>
-    )
+    );
   }
 
   renderMenu(index, publ){

@@ -1,11 +1,11 @@
 import React                                                              from 'react';
 import { Switch, Route }                                                  from 'react-router-dom'
-import AppsIcon                                                           from '@material-ui/icons/Apps';
-import ArrowBackIcon                                                      from '@material-ui/icons/ArrowBack';
-import SettingsApplicationsIcon                                           from '@material-ui/icons/SettingsApplications';
-import { createTheme, ThemeProvider }                                     from '@material-ui/core/styles';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import { blue }                                                           from '@material-ui/core/colors';
+import AppsIcon                                                           from '@mui/icons-material/Apps';
+import ArrowBackIcon                                                      from '@mui/icons-material/ArrowBack';
+import SettingsApplicationsIcon                                           from '@mui/icons-material/SettingsApplications';
+import { createTheme, ThemeProvider, StyledEngineProvider, adaptV4Theme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { blue }                                                           from '@mui/material/colors';
 import Workspace                                                          from './containers/WorkspaceMounted/Workspace';
 import Console                                                            from './containers/Console';
 import TopToolbarLeft                                                     from './containers/TopToolbarLeft'
@@ -24,14 +24,14 @@ class App extends React.Component{
 
     let win = window.require('electron').remote.getCurrentWindow();
     let style = require('./app-ui-styles/quiqr10/style-light.js');
-    let theme = createTheme({
+    let theme = createTheme(adaptV4Theme({
       palette: {
-        type: "light",
+        mode: "light",
         primary: {
           main: blue[500],
         },
       },
-    });
+    }));
 
     this.state = {
       splashDialogOpen: false,
@@ -61,14 +61,14 @@ class App extends React.Component{
           themeStyle='dark';
         }
 
-        let theme = createTheme({
+        let theme = createTheme(adaptV4Theme({
           palette: {
-            type: themeStyle,
+            mode: themeStyle,
             primary: {
               main: blue[500],
             },
           },
-        });
+        }));
 
         this.setState({
           style: require('./app-ui-styles/quiqr10/style-'+themeStyle+'.js'),
@@ -385,41 +385,42 @@ class App extends React.Component{
 
 
     return (
-      <ThemeProvider theme={this.state.theme}>
-        <CssBaseline />
+      <StyledEngineProvider injectFirst>
+        (<ThemeProvider theme={this.state.theme}>
+          <CssBaseline />
+          <React.Fragment>
+            {welcomeScreen}
 
-        <React.Fragment>
-          {welcomeScreen}
+            <div className="App" style={marginStyles}>
 
-          <div className="App" style={marginStyles}>
+              <div style={topToolbarStyle}>
 
-            <div style={topToolbarStyle}>
+                <div className="toolbarLeft">
+                  { this.renderTopToolbarLeftSwitch() }
+                </div>
 
-              <div className="toolbarLeft">
-                { this.renderTopToolbarLeftSwitch() }
+                <div className="toolbarRight">
+                  { this.renderTopToolbarRightSwitch() }
+                </div>
               </div>
 
-              <div className="toolbarRight">
-                { this.renderTopToolbarRightSwitch() }
+              <div style={containerStyle}>
+
+                <div style={menuContainerStyle} className='hideScrollbar' >
+                  { this.renderMenuSwitch() }
+                </div>
+
+                <div key="main-content" style={contentContainerStyle} onClick={()=>{ if(this.state.forceShowMenu) this.toggleForceShowMenu() }}>
+                  { this.renderContentSwitch() }
+                </div>
+
+
               </div>
+
             </div>
-
-            <div style={containerStyle}>
-
-              <div style={menuContainerStyle} className='hideScrollbar' >
-                { this.renderMenuSwitch() }
-              </div>
-
-              <div key="main-content" style={contentContainerStyle} onClick={()=>{ if(this.state.forceShowMenu) this.toggleForceShowMenu() }}>
-                { this.renderContentSwitch() }
-              </div>
-
-
-            </div>
-
-          </div>
-        </React.Fragment>
-      </ThemeProvider>
+          </React.Fragment>
+        </ThemeProvider>)
+      </StyledEngineProvider>
     );
 
   }
@@ -453,101 +454,94 @@ class App extends React.Component{
       this.state.setState({skipMenuTransition: false});
     }
 
-    return (<Switch>
-
-      <Route path="/console" exact={false} render={ ({match, history})=> {
-        this.history = history;
-
-        return (
-          <ThemeProvider theme={this.state.theme}>
-            <CssBaseline />
-            <div className="App">
-              <div key="main-content" style={contentContainerStyle} onClick={()=>{ if(this.state.forceShowMenu) this.toggleForceShowMenu() }}>
-                <Console />
-              </div>
-            </div>
-          </ThemeProvider>
-        )
-
-      }} />
-
-      <Route path='/sites/:site/workspaces/:workspace' exact render={ ({match, history})=> {
-        this.history = history;
-        return (
-          <ThemeProvider theme={this.state.theme}>
-            <CssBaseline />
-            {welcomeScreen}
-            <Workspace
-              applicationRole={ this.state.applicationRole }
-              siteKey={ decodeURIComponent(match.params.site) }
-              workspaceKey={ decodeURIComponent(match.params.workspace) } />
-          </ThemeProvider>
-
-        );
-      }} />
-      <Route path='/sites/:site/workspaces/:workspace/*' exact render={ ({match, history})=> {
-        this.history = history;
-        return (
-
-          <ThemeProvider theme={this.state.theme}>
-            <CssBaseline />
-            {welcomeScreen}
-            <Workspace
-              applicationRole={ this.state.applicationRole }
-              siteKey={ decodeURIComponent(match.params.site) }
-              workspaceKey={ decodeURIComponent(match.params.workspace) } />
-          </ThemeProvider>
-
-        );
-      }} />
-
-
-      <Route path="/refresh" exact={true} render={ ({match, history})=> {
-        this.history = history;
-        return (
-          <ThemeProvider theme={this.state.theme}>
-          </ThemeProvider>
-        )
-        }} />
-
-
-      <Route path="/sites" exact={true} render={ ({match, history})=> {
+    return (
+      <Switch>
+        <Route path="/console" exact={false} render={ ({match, history})=> {
           this.history = history;
-          return this.renderBodyWithToolbars()
-        }} />
 
-      <Route path="/sites/*" exact={true} render={ ({match, history})=> {
+          return (
+            <StyledEngineProvider injectFirst>
+              (<ThemeProvider theme={this.state.theme}>
+                <CssBaseline />
+                <div className="App">
+                  <div key="main-content" style={contentContainerStyle} onClick={()=>{ if(this.state.forceShowMenu) this.toggleForceShowMenu() }}>
+                    <Console />
+                  </div>
+                </div>
+              </ThemeProvider>)
+            </StyledEngineProvider>
+          );
+
+        }} />
+        <Route path='/sites/:site/workspaces/:workspace' exact render={ ({match, history})=> {
           this.history = history;
-          return this.renderBodyWithToolbars()
+          return (
+            <StyledEngineProvider injectFirst>
+              (<ThemeProvider theme={this.state.theme}>
+                <CssBaseline />
+                {welcomeScreen}
+                <Workspace
+                  applicationRole={ this.state.applicationRole }
+                  siteKey={ decodeURIComponent(match.params.site) }
+                  workspaceKey={ decodeURIComponent(match.params.workspace) } />
+              </ThemeProvider>)
+            </StyledEngineProvider>
+          );
         }} />
-
-      <Route path="/create-new" exact={true} render={ ({match, history})=> {
+        <Route path='/sites/:site/workspaces/:workspace/*' exact render={ ({match, history})=> {
           this.history = history;
-          return this.renderBodyWithToolbars()
+          return (
+            <StyledEngineProvider injectFirst>
+              (<ThemeProvider theme={this.state.theme}>
+                <CssBaseline />
+                {welcomeScreen}
+                <Workspace
+                  applicationRole={ this.state.applicationRole }
+                  siteKey={ decodeURIComponent(match.params.site) }
+                  workspaceKey={ decodeURIComponent(match.params.workspace) } />
+              </ThemeProvider>)
+            </StyledEngineProvider>
+          );
         }} />
-
-      <Route path="/welcome" exact={true} render={ ({match, history})=> {
+        <Route path="/refresh" exact={true} render={ ({match, history})=> {
           this.history = history;
-          return this.renderBodyWithToolbars()
-        }} />
-
-      <Route path="/prefs" exact={false} render={ ({match, history})=> {
-          this.history = history;
-          return this.renderBodyWithToolbars()
-        }} />
-
-      <Route path="/" exact={true} render={ ({match, history})=> {
-          this.history = history;
-          return this.renderBodyWithToolbars()
-        }} />
-
-      <Route path="*" exact={true} render={ ({match, history})=> {
-          this.history = history;
-          return this.renderBodyWithToolbars()
-        }} />
-
-
-    </Switch>);
+          return (
+            <StyledEngineProvider injectFirst>
+              (<ThemeProvider theme={this.state.theme}>
+              </ThemeProvider>)
+            </StyledEngineProvider>
+          );
+          }} />
+        <Route path="/sites" exact={true} render={ ({match, history})=> {
+            this.history = history;
+            return this.renderBodyWithToolbars()
+          }} />
+        <Route path="/sites/*" exact={true} render={ ({match, history})=> {
+            this.history = history;
+            return this.renderBodyWithToolbars()
+          }} />
+        <Route path="/create-new" exact={true} render={ ({match, history})=> {
+            this.history = history;
+            return this.renderBodyWithToolbars()
+          }} />
+        <Route path="/welcome" exact={true} render={ ({match, history})=> {
+            this.history = history;
+            return this.renderBodyWithToolbars()
+          }} />
+        <Route path="/prefs" exact={false} render={ ({match, history})=> {
+            this.history = history;
+            return this.renderBodyWithToolbars()
+          }} />
+        <Route path="/" exact={true} render={ ({match, history})=> {
+            this.history = history;
+            return this.renderBodyWithToolbars()
+          }} />
+        <Route path="*" exact={true} render={ ({match, history})=> {
+            this.history = history;
+            return this.renderBodyWithToolbars()
+          }} />
+      </Switch>
+    );
   }
 }
 

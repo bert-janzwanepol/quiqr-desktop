@@ -2,8 +2,8 @@ import React     from 'react';
 import { Route } from 'react-router-dom'
 import service   from './../../services/service'
 import Sidebar   from '../Sidebar';
-//import Box       from '@material-ui/core/Box';
-//import Switch    from '@material-ui/core/Switch';
+//import Box       from '@mui/material/Box';
+//import Switch    from '@mui/material/Switch';
 
 class WorkspaceSidebar extends React.Component{
 

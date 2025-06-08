@@ -1,7 +1,7 @@
 import React from 'react';
-import InfoIcon   from '@material-ui/icons/Info';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip    from '@material-ui/core/Tooltip';
+import InfoIcon   from '@mui/icons-material/Info';
+import IconButton from '@mui/material/IconButton';
+import Tooltip    from '@mui/material/Tooltip';
 
 class Tip extends React.Component {
   render(){
@@ -9,7 +9,7 @@ class Tip extends React.Component {
       <span style={{display:'inline-block', position:'relative', cursor: 'default'}}>
         <Tooltip title={this.props.markdown}>
           <span>
-            <IconButton aria-label="info" disabled={true}>
+            <IconButton aria-label="info" disabled={true} size="large">
               <InfoIcon />
             </IconButton>
           </span>

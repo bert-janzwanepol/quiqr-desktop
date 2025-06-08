@@ -1,4 +1,4 @@
-import FolderIcon from '@material-ui/icons/Folder';
+import FolderIcon from '@mui/icons-material/Folder';
 import FormConfig from './FormConfig';
 import Meta from './Meta';
 import CardNew from './CardNew';

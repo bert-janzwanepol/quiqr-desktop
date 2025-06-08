@@ -1,13 +1,14 @@
 import * as React          from 'react';
-import TextField           from '@material-ui/core/TextField';
-import { withStyles }      from '@material-ui/core/styles';
-import Box                 from '@material-ui/core/Box';
-import InputLabel          from '@material-ui/core/InputLabel';
-import Switch              from '@material-ui/core/Switch';
-import FormControlLabel    from '@material-ui/core/FormControlLabel';
-import FormControl         from '@material-ui/core/FormControl';
-import MenuItem            from '@material-ui/core/MenuItem';
-import Select              from '@material-ui/core/Select';
+import TextField           from '@mui/material/TextField';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
+import Box                 from '@mui/material/Box';
+import InputLabel          from '@mui/material/InputLabel';
+import Switch              from '@mui/material/Switch';
+import FormControlLabel    from '@mui/material/FormControlLabel';
+import FormControl         from '@mui/material/FormControl';
+import MenuItem            from '@mui/material/MenuItem';
+import Select              from '@mui/material/Select';
 import FolderPicker        from '../../../../../components/FolderPicker';
 
 const useStyles = theme => ({
@@ -176,4 +177,6 @@ class FormConfig extends React.Component{
   }
 }
 
-export default withStyles(useStyles)(FormConfig);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+// export default withStyles(useStyles)(FormConfig);
+export default FormConfig;

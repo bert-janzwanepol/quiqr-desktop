@@ -1,20 +1,16 @@
 import * as React              from 'react';
-import { withStyles }          from '@material-ui/core/styles';
-import Box                     from '@material-ui/core/Box';
-import Typography              from '@material-ui/core/Typography';
-import Link from '@material-ui/core/Link';
-import FolderIcon from '@material-ui/icons/Folder';
-import SettingsIcon from '@material-ui/icons/Settings';
-import Divider                 from '@material-ui/core/Divider';
-import Button                  from '@material-ui/core/Button';
-import ArrowUpwardIcon         from '@material-ui/icons/ArrowUpward';
-import ArrowDownwardIcon       from '@material-ui/icons/ArrowDownward';
+import Box                     from '@mui/material/Box';
+import Typography              from '@mui/material/Typography';
+import Link from '@mui/material/Link';
+import FolderIcon from '@mui/icons-material/Folder';
+import SettingsIcon from '@mui/icons-material/Settings';
+import Divider                 from '@mui/material/Divider';
+import Button                  from '@mui/material/Button';
+import ArrowUpwardIcon         from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon       from '@mui/icons-material/ArrowDownward';
 import Meta                    from './Meta'
 import {snackMessageService}   from '../../../../../services/ui-service';
 import service                 from '../../../../../services/service';
-
-const useStyles = theme => ({
-});
 
 class Dashboard extends React.Component{
 
@@ -67,7 +63,6 @@ class Dashboard extends React.Component{
 
     return (
       <React.Fragment>
-
         <Box component="div" style={{
           display:'flex',
           alignItems: 'flex-start'
@@ -94,16 +89,11 @@ class Dashboard extends React.Component{
               onClick={()=>{this.props.onConfigure()}}
               size="small"
               variant="contained"
-              color="default"
-              startIcon={<SettingsIcon />}
-            >
+              startIcon={<SettingsIcon />}>
               Configure
             </Button>
           </Box>
         </Box>
-
-
-
         <Box component="div" style={{
           display:'flex',
           alignItems: 'flex-start'
@@ -136,15 +126,13 @@ class Dashboard extends React.Component{
             :null
           }
         </Box>
-
         <Divider/>
-
       </React.Fragment>
-    )
+    );
   }
 
 }
 
-export default withStyles(useStyles)(Dashboard);
+export default Dashboard;
 
 

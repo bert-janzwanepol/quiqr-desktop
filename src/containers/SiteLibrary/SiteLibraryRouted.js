@@ -1,14 +1,14 @@
 import React                        from 'react';
-import Typography                   from '@material-ui/core/Typography';
+import Typography                   from '@mui/material/Typography';
 import { Switch, Route }            from 'react-router-dom'
-import Box                          from '@material-ui/core/Box';
-import List                         from '@material-ui/core/List';
-import ListSubheader                from '@material-ui/core/ListSubheader';
-import Grid                         from '@material-ui/core/Grid';
-import Menu                         from '@material-ui/core/Menu';
-import MenuItem                     from '@material-ui/core/MenuItem';
-import IconButton                   from '@material-ui/core/IconButton';
-import MoreVertIcon                 from '@material-ui/icons/MoreVert';
+import Box                          from '@mui/material/Box';
+import List                         from '@mui/material/List';
+import ListSubheader                from '@mui/material/ListSubheader';
+import Grid                         from '@mui/material/Grid';
+import Menu                         from '@mui/material/Menu';
+import MenuItem                     from '@mui/material/MenuItem';
+import IconButton                   from '@mui/material/IconButton';
+import MoreVertIcon                 from '@mui/icons-material/MoreVert';
 import NewSlashImportSiteDialog     from './dialogs/NewSlashImportSiteDialog';
 import EditSiteTagsDialogs          from './dialogs/EditSiteTagsDialogs';
 import RenameSiteDialog             from './dialogs/RenameSiteDialog';
@@ -19,12 +19,8 @@ import CardItem                     from './components/CardItem';
 import BlockDialog                  from './../../components/BlockDialog';
 import Spinner                      from './../../components/Spinner';
 import service                      from './../../services/service';
-import { withStyles }               from '@material-ui/core/styles';
 
 const net = window.require('electron').remote.net;
-
-const useStyles = theme => ({
-});
 
 class SiteLibraryRouted extends React.Component{
 
@@ -188,7 +184,7 @@ class SiteLibraryRouted extends React.Component{
         aria-label="more"
         aria-controls="long-menu"
         aria-haspopup="true"
-      >
+        size="large">
         <MoreVertIcon />
       </IconButton>
     );
@@ -582,4 +578,4 @@ class SiteLibraryRouted extends React.Component{
   }
 }
 
-export default withStyles(useStyles)(SiteLibraryRouted);
+export default SiteLibraryRouted;

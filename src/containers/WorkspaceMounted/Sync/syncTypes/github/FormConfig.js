@@ -1,23 +1,24 @@
 import * as React          from 'react';
 import service             from '../../../../../services/service';
-import TextField           from '@material-ui/core/TextField';
-import { withStyles }      from '@material-ui/core/styles';
-import Button              from '@material-ui/core/Button';
-import Box                 from '@material-ui/core/Box';
+import TextField           from '@mui/material/TextField';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
+import Button              from '@mui/material/Button';
+import Box                 from '@mui/material/Box';
 import clsx                from 'clsx';
-import OutlinedInput       from '@material-ui/core/OutlinedInput';
-import InputLabel          from '@material-ui/core/InputLabel';
-import InputAdornment      from '@material-ui/core/InputAdornment';
-import Switch              from '@material-ui/core/Switch';
-import FormControlLabel    from '@material-ui/core/FormControlLabel';
-import FormControl         from '@material-ui/core/FormControl';
-import Visibility          from '@material-ui/icons/Visibility';
-import VisibilityOff       from '@material-ui/icons/VisibilityOff';
-import IconButton          from '@material-ui/core/IconButton';
-import MenuItem            from '@material-ui/core/MenuItem';
-import LinearProgress      from '@material-ui/core/LinearProgress';
-import Select              from '@material-ui/core/Select';
-import Paper               from '@material-ui/core/Paper';
+import OutlinedInput       from '@mui/material/OutlinedInput';
+import InputLabel          from '@mui/material/InputLabel';
+import InputAdornment      from '@mui/material/InputAdornment';
+import Switch              from '@mui/material/Switch';
+import FormControlLabel    from '@mui/material/FormControlLabel';
+import FormControl         from '@mui/material/FormControl';
+import Visibility          from '@mui/icons-material/Visibility';
+import VisibilityOff       from '@mui/icons-material/VisibilityOff';
+import IconButton          from '@mui/material/IconButton';
+import MenuItem            from '@mui/material/MenuItem';
+import LinearProgress      from '@mui/material/LinearProgress';
+import Select              from '@mui/material/Select';
+import Paper               from '@mui/material/Paper';
 
 const useStyles = theme => ({
 
@@ -365,7 +366,6 @@ class FormConfig extends React.Component{
             className={classes.textfield}
           />
         </Box>
-
         <Box my={1}>
 
           {(this.state.keyPairBusy ?
@@ -403,7 +403,7 @@ class FormConfig extends React.Component{
                           event.preventDefault();
                         }}
                         edge="end"
-                      >
+                        size="large">
                         {this.state.showPassword ? <Visibility /> : <VisibilityOff />}
                       </IconButton>
                     </InputAdornment>
@@ -422,7 +422,6 @@ class FormConfig extends React.Component{
           <Button className={classes.keyButton} onClick={()=>{this.getKeyPair()}} disabled={this.state.keyPairBusy} color="secondary" variant="contained">Re-generate</Button>
 
         </Box>
-
         <Box my={1}>
           <FormControlLabel className={classes.keyButton}
             control={
@@ -466,13 +465,13 @@ class FormConfig extends React.Component{
           </FormControl>
 
         </Box>
-
         {this.renderGitHubActionsForm()}
       </React.Fragment>
-
-    )
+    );
   }
 }
 
-export default withStyles(useStyles)(FormConfig);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+// export default withStyles(useStyles)(FormConfig);
+export default FormConfig;
 

@@ -1,8 +1,8 @@
 import React           from 'react';
-import IconButton      from '@material-ui/core/IconButton';
-import RemoveIcon      from '@material-ui/icons/Remove';
-import AddIcon         from '@material-ui/icons/Add';
-import Button          from '@material-ui/core/Button';
+import IconButton      from '@mui/material/IconButton';
+import RemoveIcon      from '@mui/icons-material/Remove';
+import AddIcon         from '@mui/icons-material/Add';
+import Button          from '@mui/material/Button';
 import DefaultWrapper  from './shared/DefaultWrapper';
 import IconButtonGroup from '../../IconButtonGroup';
 import { BaseDynamic } from '../../HoForm';
@@ -93,15 +93,18 @@ class LeafArrayDynamic extends BaseDynamic {
               <IconButtonGroup
                 style={{flex: '0 0 auto', alignSelf: 'flex-end', position:'relative', top:'-20px'}}
                 iconButtons={[
-                  <IconButton aria-label="clear"  onClick={this.getOnRequestDeleteHandler(index)}> <RemoveIcon /> </IconButton>
+                  <IconButton
+                    aria-label="clear"
+                    onClick={this.getOnRequestDeleteHandler(index)}
+                    size="large"> <RemoveIcon /> </IconButton>
                 ]
                 } />
             </div>
           );
         })}
-
         <Button style={{marginTop:10}} endIcon={<AddIcon />} variant="contained" onClick={()=>{this.pushEmptyValue()}}>Add</Button>
-      </DefaultWrapper>);
+      </DefaultWrapper>
+    );
   }
 }
 

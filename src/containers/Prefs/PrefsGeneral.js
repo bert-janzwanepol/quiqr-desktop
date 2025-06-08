@@ -1,11 +1,12 @@
 import React                 from 'react';
-import Typography            from '@material-ui/core/Typography';
-import Select                from '@material-ui/core/Select';
-import Box                   from '@material-ui/core/Box';
-import InputLabel            from '@material-ui/core/InputLabel';
-import MenuItem              from '@material-ui/core/MenuItem';
-import FormControl           from '@material-ui/core/FormControl';
-import { withStyles }        from '@material-ui/core/styles';
+import Typography            from '@mui/material/Typography';
+import Select                from '@mui/material/Select';
+import Box                   from '@mui/material/Box';
+import InputLabel            from '@mui/material/InputLabel';
+import MenuItem              from '@mui/material/MenuItem';
+import FormControl           from '@mui/material/FormControl';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
 import service               from './../../services/service';
 import FolderPicker          from '../../components/FolderPicker';
 
@@ -140,4 +141,5 @@ class PrefsGeneral extends React.Component {
 
 }
 
-export default withStyles(useStyles)(PrefsGeneral);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+export default PrefsGeneral;

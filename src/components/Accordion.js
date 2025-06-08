@@ -1,8 +1,8 @@
 import React          from 'react';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import IconButton     from '@material-ui/core/IconButton';
-import Box               from '@material-ui/core/Box';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import IconButton     from '@mui/material/IconButton';
+import Box               from '@mui/material/Box';
 
 class AccordionHeader extends React.PureComponent {
 

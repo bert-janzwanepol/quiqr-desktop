@@ -1,5 +1,5 @@
 import * as React        from 'react';
-import SysGitIcon from '@material-ui/icons/GitHub';
+import SysGitIcon from '@mui/icons-material/GitHub';
 
 export default class Meta {
 

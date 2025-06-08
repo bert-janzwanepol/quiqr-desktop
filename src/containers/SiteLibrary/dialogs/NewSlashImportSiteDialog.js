@@ -8,27 +8,28 @@ import FormPartialNewFromHugoTheme  from './partials/FormPartialNewFromHugoTheme
 import FormPartialNewFromScratch    from './partials/FormPartialNewFromScratch';
 import FormPartialNewFromFolder     from './partials/FormPartialNewFromFolder';
 import FormPartialImportFromGit     from './partials/FormPartialImportFromGit';
-import { withStyles }               from '@material-ui/core/styles';
-import TextField                    from '@material-ui/core/TextField';
-import Button                       from '@material-ui/core/Button';
-import Typography                   from '@material-ui/core/Typography';
-import FolderIcon                   from '@material-ui/icons/Folder';
-import BuildIcon                    from '@material-ui/icons/Build';
-import Box                          from '@material-ui/core/Box';
-import Grid                         from '@material-ui/core/Grid';
-import Paper                        from '@material-ui/core/Paper';
-import CircularProgress             from '@material-ui/core/CircularProgress';
-import Dialog                       from '@material-ui/core/Dialog';
-import DialogActions                from '@material-ui/core/DialogActions';
-import DialogContent                from '@material-ui/core/DialogContent';
-//import DialogContentText            from '@material-ui/core/DialogContentText';
-import DialogTitle                  from '@material-ui/core/DialogTitle';
-import Select                       from '@material-ui/core/Select';
-import Switch                       from '@material-ui/core/Switch';
-import FormControlLabel             from '@material-ui/core/FormControlLabel';
-import FormControl                  from '@material-ui/core/FormControl';
-import MenuItem                     from '@material-ui/core/MenuItem';
-import InputLabel                   from '@material-ui/core/InputLabel';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
+import TextField                    from '@mui/material/TextField';
+import Button                       from '@mui/material/Button';
+import Typography                   from '@mui/material/Typography';
+import FolderIcon                   from '@mui/icons-material/Folder';
+import BuildIcon                    from '@mui/icons-material/Build';
+import Box                          from '@mui/material/Box';
+import Grid                         from '@mui/material/Grid';
+import Paper                        from '@mui/material/Paper';
+import CircularProgress             from '@mui/material/CircularProgress';
+import Dialog                       from '@mui/material/Dialog';
+import DialogActions                from '@mui/material/DialogActions';
+import DialogContent                from '@mui/material/DialogContent';
+//import DialogContentText            from '@mui/material/DialogContentText';
+import DialogTitle                  from '@mui/material/DialogTitle';
+import Select                       from '@mui/material/Select';
+import Switch                       from '@mui/material/Switch';
+import FormControlLabel             from '@mui/material/FormControlLabel';
+import FormControl                  from '@mui/material/FormControl';
+import MenuItem                     from '@mui/material/MenuItem';
+import InputLabel                   from '@mui/material/InputLabel';
 
 const useStyles = theme => ({
 
@@ -605,4 +606,6 @@ class NewSiteDialog extends React.Component{
   }
 }
 
-export default withStyles(useStyles)(NewSiteDialog);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+// export default withStyles(useStyles)(NewSiteDialog);
+export default NewSiteDialog;

@@ -1,13 +1,13 @@
 import React                               from 'react';
 import { withRouter }                      from 'react-router';
 import { Switch, Route }                   from 'react-router-dom'
-import AppsIcon                            from '@material-ui/icons/Apps';
-import SettingsApplicationsIcon            from '@material-ui/icons/SettingsApplications';
-import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
-import BuildIcon                           from '@material-ui/icons/Build';
-import LibraryBooksIcon                    from '@material-ui/icons/LibraryBooks';
-import SyncIcon                            from '@material-ui/icons/Sync';
-import OpenInBrowserIcon                   from '@material-ui/icons/OpenInBrowser';
+import AppsIcon                            from '@mui/icons-material/Apps';
+import SettingsApplicationsIcon            from '@mui/icons-material/SettingsApplications';
+import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
+import BuildIcon                           from '@mui/icons-material/Build';
+import LibraryBooksIcon                    from '@mui/icons-material/LibraryBooks';
+import SyncIcon                            from '@mui/icons-material/Sync';
+import OpenInBrowserIcon                   from '@mui/icons-material/OpenInBrowser';
 import Dashboard                           from './Dashboard'
 import TopToolbarLeft                      from '../TopToolbarLeft'
 import {TopToolbarRight, ToolbarButton}    from '../TopToolbarRight'

@@ -1,14 +1,15 @@
 import React                 from 'react';
-import Card                  from '@material-ui/core/Card';
-import CardActionArea        from '@material-ui/core/CardActionArea';
-import CardHeader            from '@material-ui/core/CardHeader';
-import CardMedia             from '@material-ui/core/CardMedia';
-import Avatar                from '@material-ui/core/Avatar';
-import { red }               from '@material-ui/core/colors';
+import Card                  from '@mui/material/Card';
+import CardActionArea        from '@mui/material/CardActionArea';
+import CardHeader            from '@mui/material/CardHeader';
+import CardMedia             from '@mui/material/CardMedia';
+import Avatar                from '@mui/material/Avatar';
+import { red }               from '@mui/material/colors';
 import service               from '../../../services/service';
 import ScreenShotPlaceholder from '../../../img-assets/screenshot-placeholder.png';
 
-import { withStyles } from '@material-ui/core/styles';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
 
 const useStyles = theme => ({
   root: {
@@ -133,6 +134,8 @@ class CardItem extends React.Component {
 
 }
 
-export default withStyles(useStyles)(CardItem);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+// export default withStyles(useStyles)(CardItem);
+export default CardItem;
 
 

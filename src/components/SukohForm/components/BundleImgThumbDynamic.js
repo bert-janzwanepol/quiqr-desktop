@@ -1,8 +1,8 @@
 import React                 from 'react';
-import IconBroken            from '@material-ui/icons/BrokenImage';
-import MovieIcon             from '@material-ui/icons/Movie';
-import PictureAsPdfIcon      from '@material-ui/icons/PictureAsPdf';
-import InsertDriveFileIcon   from '@material-ui/icons/InsertDriveFile';
+import IconBroken            from '@mui/icons-material/BrokenImage';
+import MovieIcon             from '@mui/icons-material/Movie';
+import PictureAsPdfIcon      from '@mui/icons-material/PictureAsPdf';
+import InsertDriveFileIcon   from '@mui/icons-material/InsertDriveFile';
 import { BaseDynamic }       from '../../HoForm';
 import Spinner               from '../../Spinner';
 

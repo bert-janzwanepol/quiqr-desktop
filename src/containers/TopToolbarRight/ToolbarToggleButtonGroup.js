@@ -1,10 +1,11 @@
 import React from 'react';
 
-import Box               from '@material-ui/core/Box';
-import Button            from '@material-ui/core/Button';
-import ToggleButton      from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import { withStyles }    from '@material-ui/core/styles';
+import Box               from '@mui/material/Box';
+import Button            from '@mui/material/Button';
+import ToggleButton      from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
 
 
 const useStyles = theme => ({
@@ -41,5 +42,7 @@ class ToolbarToggleButtonGroup extends React.Component {
   }
 }
 
-export default withStyles(useStyles)(ToolbarToggleButtonGroup);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+// export default withStyles(useStyles)(ToolbarToggleButtonGroup);
+export default ToolbarToggleButtonGroup;
 

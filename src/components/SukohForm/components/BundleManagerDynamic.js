@@ -1,11 +1,11 @@
 import React                                from 'react';
-import FolderOpen                           from '@material-ui/icons/FolderOpen';
-import Button                               from '@material-ui/core/Button';
+import FolderOpen                           from '@mui/icons-material/FolderOpen';
+import Button                               from '@mui/material/Button';
 import { BundleManager, BundleManagerItem } from '../../BundleManager';
 import DangerButton                         from '../../DangerButton';
-import FolderIcon                           from '@material-ui/icons/Folder';
-import IconButton                           from '@material-ui/core/IconButton';
-import DeleteIcon                           from '@material-ui/icons/Delete';
+import FolderIcon                           from '@mui/icons-material/Folder';
+import IconButton                           from '@mui/material/IconButton';
+import DeleteIcon                           from '@mui/icons-material/Delete';
 import { BaseDynamic }                      from '../../HoForm';
 import path                                 from 'path';
 import service                              from '../../../services/service';
@@ -168,7 +168,7 @@ class BundleManagerDynamic extends BaseDynamic {
     itemsStates = this.state.absFiles.filter(x => {
       return (
         //x.src.startsWith(field.path) && x.__deleted !== true && ( field.extensions || field.extensions.indexOf(extractExt(x.src))!==-1 )
-        x.__deleted !== true && ( field.extensions || field.extensions.indexOf(extractExt(x.src))!==-1 )
+        (x.__deleted !== true && (field.extensions || field.extensions.indexOf(extractExt(x.src))!==-1))
       );
     });
 
@@ -183,93 +183,89 @@ class BundleManagerDynamic extends BaseDynamic {
       }
     }
 
-    return (<React.Fragment>
+    return (
+      <React.Fragment>
+        <div style={{padding:'16px 0'}}>
+          <strong>{field.title?field.title:"Page files"}</strong>
+          <br/>
+        { field.path.substring(0,1) === '/' ?
+          <React.Fragment>
+          <IconButton
+            color="primary"
+            aria-label="directions"
+            onClick={()=>{
+              service.api.openFileExplorer(field.path, true);
+            }}
+            size="large">
+            <FolderIcon />
+          </IconButton>
+            {field.path}
+          </React.Fragment>
+          :null}
 
+        </div>
+        { showAddButton && field.addButtonLocationTop ?
 
+            <Button
+              style={{marginBottom:'16px', marginTop:itemsStates.length?'0px':undefined}}
+              startIcon={<FolderOpen />} variant="contained"  onClick={()=>{
+              this.onButtonClick()
+              }}>
+              Add File
+            </Button>
 
-      <div style={{padding:'16px 0'}}>
-        <strong>{field.title?field.title:"Page files"}</strong>
-        <br/>
-      { field.path.substring(0,1) === '/' ?
-        <React.Fragment>
-        <IconButton color="primary"  aria-label="directions"
-          onClick={()=>{
-            service.api.openFileExplorer(field.path, true);
-          }}>
-          <FolderIcon />
-        </IconButton>
-          {field.path}
-        </React.Fragment>
-        :null}
+            :null
+        }
+        <BundleManager forceActive={true}>
 
-      </div>
+          { (itemsStates).map((state,childIndex)=>{
 
+            let newNode = {
+              field,
+              state,
+              uiState:{},
+              parent: node
+            };
 
+            let filename = state.name||state.src;
 
-      { showAddButton && field.addButtonLocationTop ?
+            return (<BundleManagerItem
+              style={{marginTop:childIndex?'0px':undefined}}
+              bodyStyle={{padding:'0px 0px 0px 0px'}}
+              label={filename}
+              forceActive={true}
+              path={state.src}
+              key={field.key+'-resource-'+childIndex}
+              body={context.renderLevel(newNode)}
+              headerRightItems={[
+                <DangerButton
+                onClick={(e, loaded)=>{
+                  e.stopPropagation();
+                  if(loaded){
+                    this.removeItemWithValue(state)
+                  }
+                }}
 
-          <Button
-            style={{marginBottom:'16px', marginTop:itemsStates.length?'0px':undefined}}
-            startIcon={<FolderOpen />} variant="contained"  onClick={()=>{
-            this.onButtonClick()
-            }}>
-            Add File
-          </Button>
+                loadedButton={<IconButton  size="small" color="secondary" aria-label="delete"> <DeleteIcon /> </IconButton>}
+                button={<IconButton  size="small" aria-label="delete"> <DeleteIcon /> </IconButton>} 
+              />
+              ]}
+              />)
+          }) }
+            </BundleManager>
+        { showAddButton && !field.addButtonLocationTop ?
+            <Button
+              style={{marginBottom:'16px', marginTop:itemsStates.length?'0px':undefined}}
+              startIcon={<FolderOpen />} variant="contained"  onClick={()=>{
+              this.onButtonClick()
+              }}>
+              Add File
+            </Button>
 
-          :null
-      }
-
-      <BundleManager forceActive={true}>
-
-        { (itemsStates).map((state,childIndex)=>{
-
-          let newNode = {
-            field,
-            state,
-            uiState:{},
-            parent: node
-          };
-
-          let filename = state.name||state.src;
-
-          return (<BundleManagerItem
-            style={{marginTop:childIndex?'0px':undefined}}
-            bodyStyle={{padding:'0px 0px 0px 0px'}}
-            label={filename}
-            forceActive={true}
-            path={state.src}
-            key={field.key+'-resource-'+childIndex}
-            body={context.renderLevel(newNode)}
-            headerRightItems={[
-              <DangerButton
-              onClick={(e, loaded)=>{
-                e.stopPropagation();
-                if(loaded){
-                  this.removeItemWithValue(state)
-                }
-              }}
-
-              loadedButton={<IconButton  size="small" color="secondary" aria-label="delete"> <DeleteIcon /> </IconButton>}
-              button={<IconButton  size="small" aria-label="delete"> <DeleteIcon /> </IconButton>} 
-            />
-            ]}
-            />)
-        }) }
-          </BundleManager>
-
-      { showAddButton && !field.addButtonLocationTop ?
-          <Button
-            style={{marginBottom:'16px', marginTop:itemsStates.length?'0px':undefined}}
-            startIcon={<FolderOpen />} variant="contained"  onClick={()=>{
-            this.onButtonClick()
-            }}>
-            Add File
-          </Button>
-
-          :null
-      }
-
-        </React.Fragment>);
+            :null
+        }
+      </React.Fragment>
+    );
   }
 
   getValue(context){

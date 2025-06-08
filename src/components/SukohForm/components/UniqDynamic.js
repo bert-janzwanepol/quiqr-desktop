@@ -1,11 +1,11 @@
 import React                     from 'react';
 import FormItemWrapper           from './shared/FormItemWrapper';
-import TextField from '@material-ui/core/TextField';
+import TextField from '@mui/material/TextField';
 import Tip                       from '../../Tip';
 import type { FormStateBuilder } from '../../HoForm';
 import { BaseDynamic }           from '../../HoForm';
-import IconRefresh               from '@material-ui/icons/Refresh';
-import Button                    from '@material-ui/core/Button';
+import IconRefresh               from '@mui/icons-material/Refresh';
+import Button                    from '@mui/material/Button';
 
 type UniqDynamicField = {
   key: string,

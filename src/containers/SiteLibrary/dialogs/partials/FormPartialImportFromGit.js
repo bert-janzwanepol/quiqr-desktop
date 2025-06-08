@@ -1,32 +1,33 @@
 import * as React            from 'react';
 import service               from '../../../../services/service';
-import { withStyles }        from '@material-ui/core/styles';
-import CircularProgress      from '@material-ui/core/CircularProgress';
-import Table                 from '@material-ui/core/Table';
-import TableRow              from '@material-ui/core/TableRow';
-import TableCell             from '@material-ui/core/TableCell';
-import TableBody             from '@material-ui/core/TableBody';
-import TableContainer        from '@material-ui/core/TableContainer';
-import Card                  from '@material-ui/core/Card';
-import CardContent           from '@material-ui/core/CardContent';
-import CardMedia             from '@material-ui/core/CardMedia';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
+import CircularProgress      from '@mui/material/CircularProgress';
+import Table                 from '@mui/material/Table';
+import TableRow              from '@mui/material/TableRow';
+import TableCell             from '@mui/material/TableCell';
+import TableBody             from '@mui/material/TableBody';
+import TableContainer        from '@mui/material/TableContainer';
+import Card                  from '@mui/material/Card';
+import CardContent           from '@mui/material/CardContent';
+import CardMedia             from '@mui/material/CardMedia';
 import ScreenShotPlaceholder from '../../../../img-assets/screenshot-placeholder.png';
-import TextField             from '@material-ui/core/TextField';
-import Button                from '@material-ui/core/Button';
-import Paper                from '@material-ui/core/Paper';
-import Typography            from '@material-ui/core/Typography';
-import Box                   from '@material-ui/core/Box';
-import Switch                       from '@material-ui/core/Switch';
-import FormControlLabel             from '@material-ui/core/FormControlLabel';
-import FormControl         from '@material-ui/core/FormControl';
-import Visibility          from '@material-ui/icons/Visibility';
-import VisibilityOff       from '@material-ui/icons/VisibilityOff';
-import IconButton          from '@material-ui/core/IconButton';
-import InputLabel          from '@material-ui/core/InputLabel';
-import InputAdornment      from '@material-ui/core/InputAdornment';
-import LinearProgress      from '@material-ui/core/LinearProgress';
+import TextField             from '@mui/material/TextField';
+import Button                from '@mui/material/Button';
+import Paper                from '@mui/material/Paper';
+import Typography            from '@mui/material/Typography';
+import Box                   from '@mui/material/Box';
+import Switch                       from '@mui/material/Switch';
+import FormControlLabel             from '@mui/material/FormControlLabel';
+import FormControl         from '@mui/material/FormControl';
+import Visibility          from '@mui/icons-material/Visibility';
+import VisibilityOff       from '@mui/icons-material/VisibilityOff';
+import IconButton          from '@mui/material/IconButton';
+import InputLabel          from '@mui/material/InputLabel';
+import InputAdornment      from '@mui/material/InputAdornment';
+import LinearProgress      from '@mui/material/LinearProgress';
 import clsx                from 'clsx';
-import OutlinedInput       from '@material-ui/core/OutlinedInput';
+import OutlinedInput       from '@mui/material/OutlinedInput';
 
 
 const useStyles = theme => ({
@@ -380,9 +381,6 @@ class FormPartialNewFromScratch extends React.Component{
           />
           */}
         </Box>
-
-
-
         <Box my={1} >
 
 
@@ -421,7 +419,7 @@ class FormPartialNewFromScratch extends React.Component{
                           event.preventDefault();
                         }}
                         edge="end"
-                      >
+                        size="large">
                         {this.state.showPassword ? <Visibility /> : <VisibilityOff />}
                       </IconButton>
                     </InputAdornment>
@@ -440,9 +438,8 @@ class FormPartialNewFromScratch extends React.Component{
           <Button className={classes.keyButton} onClick={()=>{this.getKeyPair()}} disabled={this.state.keyPairBusy} color="secondary" variant="contained">Re-generate</Button>
 
         </Box>
-
       </React.Fragment>
-    )
+    );
 
   }
 
@@ -614,6 +611,8 @@ class FormPartialNewFromScratch extends React.Component{
 
 }
 
-export default withStyles(useStyles)(FormPartialNewFromScratch);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+// export default withStyles(useStyles)(FormPartialNewFromScratch);
+export default FormPartialNewFromScratch;
 
 

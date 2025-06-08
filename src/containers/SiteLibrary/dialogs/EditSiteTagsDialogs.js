@@ -1,18 +1,13 @@
 import * as React           from 'react';
 import service              from '../../../services/service';
 import Chips                from '../../../components/Chips';
-import { withStyles }       from '@material-ui/core/styles';
-import Button               from '@material-ui/core/Button';
-import Box                  from '@material-ui/core/Box';
-import Dialog               from '@material-ui/core/Dialog';
-import DialogActions        from '@material-ui/core/DialogActions';
-import DialogContent        from '@material-ui/core/DialogContent';
-import DialogContentText    from '@material-ui/core/DialogContentText';
-import DialogTitle          from '@material-ui/core/DialogTitle';
-
-const useStyles = theme => ({
-
-});
+import Button               from '@mui/material/Button';
+import Box                  from '@mui/material/Box';
+import Dialog               from '@mui/material/Dialog';
+import DialogActions        from '@mui/material/DialogActions';
+import DialogContent        from '@mui/material/DialogContent';
+import DialogContentText    from '@mui/material/DialogContentText';
+import DialogTitle          from '@mui/material/DialogTitle';
 
 
 class EditTagsDialogs extends React.Component{
@@ -141,4 +136,4 @@ class EditTagsDialogs extends React.Component{
     );
   }
 }
-export default withStyles(useStyles)(EditTagsDialogs)
+export default EditTagsDialogs

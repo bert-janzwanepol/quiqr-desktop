@@ -1,6 +1,7 @@
 import React          from 'react';
-import Typography     from '@material-ui/core/Typography';
-import { withStyles } from '@material-ui/core/styles';
+import Typography     from '@mui/material/Typography';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
 import Single         from '../Single';
 import service        from './../../../services/service';
 
@@ -116,4 +117,6 @@ class SiteConfRouteEtalage extends React.Component {
   }
 }
 
-export default withStyles(useStyles)(SiteConfRouteEtalage);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+// export default withStyles(useStyles)(SiteConfRouteEtalage);
+export default SiteConfRouteEtalage;

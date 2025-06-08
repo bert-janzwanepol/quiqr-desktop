@@ -1,17 +1,12 @@
 import * as React        from 'react';
 import QuiqrColorLogo    from '../svg-assets/QuiqrColorLogo';
-import { withStyles }    from '@material-ui/core/styles';
-import Button            from '@material-ui/core/Button';
-import Box               from '@material-ui/core/Box';
-import FormControlLabel  from '@material-ui/core/FormControlLabel';
-import Checkbox          from '@material-ui/core/Checkbox';
-import Typography        from '@material-ui/core/Typography';
-import Dialog            from '@material-ui/core/Dialog';
-import DialogContent     from '@material-ui/core/DialogContent';
-
-const useStyles = theme => ({
-
-});
+import Button            from '@mui/material/Button';
+import Box               from '@mui/material/Box';
+import FormControlLabel  from '@mui/material/FormControlLabel';
+import Checkbox          from '@mui/material/Checkbox';
+import Typography        from '@mui/material/Typography';
+import Dialog            from '@mui/material/Dialog';
+import DialogContent     from '@mui/material/DialogContent';
 
 class SplashDialog extends React.Component{
 
@@ -106,5 +101,5 @@ class SplashDialog extends React.Component{
     );
   }
 }
-export default withStyles(useStyles)(SplashDialog)
+export default SplashDialog
 

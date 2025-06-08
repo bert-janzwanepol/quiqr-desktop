@@ -1,6 +1,6 @@
 import React from 'react';
-import Snackbar from '@material-ui/core/Snackbar';
-import Alert from '@material-ui/lab/Alert';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 import { snackMessageService } from './../services/ui-service';
 
 class SnackbarManager extends React.Component{

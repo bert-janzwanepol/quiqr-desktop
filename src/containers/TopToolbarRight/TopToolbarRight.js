@@ -1,8 +1,9 @@
 import React from 'react';
 
-import Grid            from '@material-ui/core/Grid';
-import Box            from '@material-ui/core/Box';
-import { withStyles } from '@material-ui/core/styles';
+import Grid            from '@mui/material/Grid';
+import Box            from '@mui/material/Box';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
 
 const useStyles = theme => ({
   iconButton: {
@@ -43,4 +44,6 @@ class TopToolbarRight extends React.Component {
   }
 }
 
-export default withStyles(useStyles)(TopToolbarRight);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+// export default withStyles(useStyles)(TopToolbarRight);
+export default TopToolbarRight;

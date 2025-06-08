@@ -1,14 +1,14 @@
 import * as React        from 'react';
 import Spinner           from './../../../components/Spinner'
-import TextField         from '@material-ui/core/TextField';
-import Button            from '@material-ui/core/Button';
-import DialogTitle       from '@material-ui/core/DialogTitle';
-import Dialog            from '@material-ui/core/Dialog';
-import DialogActions     from '@material-ui/core/DialogActions';
-import DialogContent     from '@material-ui/core/DialogContent';
-import Select            from '@material-ui/core/Select';
-import MenuItem          from '@material-ui/core/MenuItem';
-import Box               from '@material-ui/core/Box';
+import TextField         from '@mui/material/TextField';
+import Button            from '@mui/material/Button';
+import DialogTitle       from '@mui/material/DialogTitle';
+import Dialog            from '@mui/material/Dialog';
+import DialogActions     from '@mui/material/DialogActions';
+import DialogContent     from '@mui/material/DialogContent';
+import Select            from '@mui/material/Select';
+import MenuItem          from '@mui/material/MenuItem';
+import Box               from '@mui/material/Box';
 
 class CopyItemToLanguageDialog extends React.Component{
 

@@ -2,12 +2,12 @@ import * as React                                                 from 'react';
 import { Route }                                                  from 'react-router-dom';
 import service                                                    from './../../services/service';
 import {TopToolbarRight, ToolbarButton, ToolbarToggleButtonGroup} from '../TopToolbarRight'
-import AppsIcon                                                   from '@material-ui/icons/Apps';
-import SettingsApplicationsIcon                                   from '@material-ui/icons/SettingsApplications';
-import InputIcon                                                  from '@material-ui/icons/Input';
-import AddIcon                                                    from '@material-ui/icons/Add';
-import ViewListIcon                                               from '@material-ui/icons/ViewList';
-import ViewModuleIcon                                             from '@material-ui/icons/ViewModule';
+import AppsIcon                                                   from '@mui/icons-material/Apps';
+import SettingsApplicationsIcon                                   from '@mui/icons-material/SettingsApplications';
+import InputIcon                                                  from '@mui/icons-material/Input';
+import AddIcon                                                    from '@mui/icons-material/Add';
+import ViewListIcon                                               from '@mui/icons-material/ViewList';
+import ViewModuleIcon                                             from '@mui/icons-material/ViewModule';
 
 
 export class SiteLibraryToolbarRight extends React.Component {

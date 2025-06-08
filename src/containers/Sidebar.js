@@ -1,23 +1,16 @@
 import React                   from 'react';
-import { withStyles }          from '@material-ui/core/styles';
-import Divider                 from '@material-ui/core/Divider';
-import List                    from '@material-ui/core/List';
-import ListSubheader           from '@material-ui/core/ListSubheader';
-import ListItem                from '@material-ui/core/ListItem';
-import ListItemIcon            from '@material-ui/core/ListItemIcon';
-import ListItemText            from '@material-ui/core/ListItemText';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import Box                     from '@material-ui/core/Box';
-import Collapse                from '@material-ui/core/Collapse';
-import ExpandLess              from '@material-ui/icons/ExpandLess';
-import ExpandMore              from '@material-ui/icons/ExpandMore';
-import IconButton              from '@material-ui/core/IconButton';
-
-const useStyles = theme => ({
-  nested: {
-    paddingLeft: theme.spacing(4),
-  },
-});
+import Divider                 from '@mui/material/Divider';
+import List                    from '@mui/material/List';
+import ListSubheader           from '@mui/material/ListSubheader';
+import ListItem                from '@mui/material/ListItem';
+import ListItemIcon            from '@mui/material/ListItemIcon';
+import ListItemText            from '@mui/material/ListItemText';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
+import Box                     from '@mui/material/Box';
+import Collapse                from '@mui/material/Collapse';
+import ExpandLess              from '@mui/icons-material/ExpandLess';
+import ExpandMore              from '@mui/icons-material/ExpandMore';
+import IconButton              from '@mui/material/IconButton';
 
 class Sidebar extends React.Component{
 
@@ -82,7 +75,7 @@ class Sidebar extends React.Component{
           key={"itemNestChild"+itemChild.label}
           onClick={ itemChild.onClick }
           selected={itemChild.selected}
-          button className={classes.nested} >
+          button sx={{ paddingLeft: (theme) => theme.spacing(4) }}>
           <ListItemText primary={itemChild.label} />
         </ListItem>
       )
@@ -140,11 +133,13 @@ class Sidebar extends React.Component{
                   { menu.title }
 
                   { (menu.expandable ?
-                  <IconButton edge="end" style={{position:'absolute',top:'6px', right: '12px'}}
+                  <IconButton
+                    edge="end"
+                    style={{position:'absolute',top:'6px', right: '12px'}}
                     onClick={()=>{
                       this.toggleMenuExpand(menu.title);
                     }}
-                  >
+                    size="large">
                     { menusCollapsed.includes(menu.title) ? <ExpandMore/> : <ExpandLess/>}
                   </IconButton>
                   : null )
@@ -195,4 +190,4 @@ class Sidebar extends React.Component{
   }
 }
 
-export default withStyles(useStyles)(Sidebar);
+export default Sidebar;

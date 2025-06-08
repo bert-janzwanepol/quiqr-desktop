@@ -1,10 +1,11 @@
 import React                          from 'react';
 import { Route }                      from 'react-router-dom';
 import service                        from './../../../services/service';
-import { withStyles }                 from '@material-ui/core/styles';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
 import SyncConfigDialog               from './components/SyncConfigDialog';
 import SyncBusyDialog                 from './components/SyncBusyDialog';
-import Button                         from '@material-ui/core/Button';
+import Button                         from '@mui/material/Button';
 //targets
 import {Dashboard as GitHubDashboard} from './syncTypes/github'
 import {Dashboard as SysGitDashboard} from './syncTypes/sysgit'
@@ -300,4 +301,6 @@ class SyncRouteGeneral extends React.Component {
   }
 }
 
-export default withStyles(useStyles)(SyncRouteGeneral);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+// export default withStyles(useStyles)(SyncRouteGeneral);
+export default SyncRouteGeneral;

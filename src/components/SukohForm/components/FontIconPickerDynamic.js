@@ -1,7 +1,7 @@
 import React           from 'react';
-import InputLabel      from '@material-ui/core/InputLabel';
-import FormControl     from '@material-ui/core/FormControl';
-import TextField       from '@material-ui/core/TextField';
+import InputLabel      from '@mui/material/InputLabel';
+import FormControl     from '@mui/material/FormControl';
+import TextField       from '@mui/material/TextField';
 import FormItemWrapper from './shared/FormItemWrapper';
 import { BaseDynamic } from '../../HoForm';
 import Tip             from '../../Tip';

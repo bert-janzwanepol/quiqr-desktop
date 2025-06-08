@@ -1,6 +1,6 @@
 import React     from 'react';
-import TextField from '@material-ui/core/TextField';
-import Chip      from '@material-ui/core/Chip';
+import TextField from '@mui/material/TextField';
+import Chip      from '@mui/material/Chip';
 
 const Fragment = React.Fragment;
 

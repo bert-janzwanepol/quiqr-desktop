@@ -1,21 +1,5 @@
 import React from 'react';
-import Box from '@material-ui/core/Box';
-import { withStyles } from '@material-ui/core/styles';
-
-const useStyles = theme => ({
-
-  root: {
-    display: 'flex',
-    '& > *': {
-      margin: theme.spacing(1),
-    },
-  },
-
-  siteAvatar: {
-    width: theme.spacing(3),
-    height: theme.spacing(3),
-  }
-});
+import Box from '@mui/material/Box';
 
 
 class TopToolbarLeft extends React.Component {
@@ -29,4 +13,4 @@ class TopToolbarLeft extends React.Component {
   }
 }
 
-export default withStyles(useStyles)(TopToolbarLeft);
+export default TopToolbarLeft;

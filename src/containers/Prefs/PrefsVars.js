@@ -1,13 +1,14 @@
 import React          from 'react';
 import service        from './../../services/service';
-import Typography     from '@material-ui/core/Typography';
-import TextField      from '@material-ui/core/TextField';
-import Button         from '@material-ui/core/Button';
-import IconButton      from '@material-ui/core/IconButton';
-import RemoveIcon      from '@material-ui/icons/Remove';
+import Typography     from '@mui/material/Typography';
+import TextField      from '@mui/material/TextField';
+import Button         from '@mui/material/Button';
+import IconButton      from '@mui/material/IconButton';
+import RemoveIcon      from '@mui/icons-material/Remove';
 
 
-import { withStyles } from '@material-ui/core/styles';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
 
 const useStyles = theme => ({
 
@@ -79,14 +80,16 @@ class PrefsVars extends React.Component {
                 this.setState({appVariables: appVariables})
               }}
             />
-            <IconButton aria-label="clear"  onClick={()=>{
-              let appVariables= this.state.appVariables;
-              delete appVariables[index]
-              this.setState({appVariables: appVariables})
-            }}> <RemoveIcon /> </IconButton>
-
+            <IconButton
+              aria-label="clear"
+              onClick={()=>{
+                let appVariables= this.state.appVariables;
+                delete appVariables[index]
+                this.setState({appVariables: appVariables})
+              }}
+              size="large"> <RemoveIcon /> </IconButton>
           </React.Fragment>
-        )
+        );
       }
       else{
         return null;
@@ -132,4 +135,6 @@ class PrefsVars extends React.Component {
 
 }
 
-export default withStyles(useStyles)(PrefsVars);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+// export default withStyles(useStyles)(PrefsVars);
+export default PrefsVars;

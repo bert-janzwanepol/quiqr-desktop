@@ -1,26 +1,26 @@
 import * as React                    from 'react';
 import { Route }                     from 'react-router-dom';
-import DialogTitle                   from '@material-ui/core/DialogTitle';
-import Dialog                        from '@material-ui/core/Dialog';
-import DialogActions                 from '@material-ui/core/DialogActions';
-import DialogContent                 from '@material-ui/core/DialogContent';
-import DialogContentText             from '@material-ui/core/DialogContentText';
-import Switch                        from '@material-ui/core/Switch';
-import FormControlLabel              from '@material-ui/core/FormControlLabel';
-import Divider                       from '@material-ui/core/Divider';
-import List                          from '@material-ui/core/List';
-import ListItem                      from '@material-ui/core/ListItem';
-import ListItemSecondaryAction       from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText                  from '@material-ui/core/ListItemText';
-import TextField                     from '@material-ui/core/TextField';
-import Paper                         from '@material-ui/core/Paper';
-import Chip                          from '@material-ui/core/Chip';
-import MenuItem                      from '@material-ui/core/MenuItem';
-import Menu                          from '@material-ui/core/Menu';
-import IconButton                    from '@material-ui/core/IconButton';
-import MoreVertIcon                  from '@material-ui/icons/MoreVert';
-import Button                        from '@material-ui/core/Button';
-import Typography                    from '@material-ui/core/Typography';
+import DialogTitle                   from '@mui/material/DialogTitle';
+import Dialog                        from '@mui/material/Dialog';
+import DialogActions                 from '@mui/material/DialogActions';
+import DialogContent                 from '@mui/material/DialogContent';
+import DialogContentText             from '@mui/material/DialogContentText';
+import Switch                        from '@mui/material/Switch';
+import FormControlLabel              from '@mui/material/FormControlLabel';
+import Divider                       from '@mui/material/Divider';
+import List                          from '@mui/material/List';
+import ListItem                      from '@mui/material/ListItem';
+import ListItemSecondaryAction       from '@mui/material/ListItemSecondaryAction';
+import ListItemText                  from '@mui/material/ListItemText';
+import TextField                     from '@mui/material/TextField';
+import Paper                         from '@mui/material/Paper';
+import Chip                          from '@mui/material/Chip';
+import MenuItem                      from '@mui/material/MenuItem';
+import Menu                          from '@mui/material/Menu';
+import IconButton                    from '@mui/material/IconButton';
+import MoreVertIcon                  from '@mui/icons-material/MoreVert';
+import Button                        from '@mui/material/Button';
+import Typography                    from '@mui/material/Typography';
 import DeleteItemKeyDialog           from './DeleteItemKeyDialog'
 import EditItemKeyDialog             from './EditItemKeyDialog'
 import CopyItemKeyDialog             from './CopyItemKeyDialog'
@@ -162,7 +162,6 @@ class CollectionListItems extends React.PureComponent {
           }
 
         </Menu>
-
         { filteredItems.map((item, index) => {
           let text = item.label||item.key;
           if(this.props.showSortValue){
@@ -172,21 +171,24 @@ class CollectionListItems extends React.PureComponent {
           return (
             <Fragment key={item.key}>
               {index!==0?<Divider />:undefined}
-
               <ListItem role={undefined}  button onClick={()=> {onItemClick(item)}}>
                 <ListItemText id={text} primary={`${text}`} />
 
                 <ListItemSecondaryAction>
-                  <IconButton edge="end" aria-label="comments" onClick={(e)=>this.handleClick(e, item)}>
+                  <IconButton
+                    edge="end"
+                    aria-label="comments"
+                    onClick={(e)=>this.handleClick(e, item)}
+                    size="large">
                     <MoreVertIcon />
                   </IconButton>
                 </ListItemSecondaryAction>
               </ListItem>
             </Fragment>
-          )
+          );
         }) }
       </React.Fragment>
-    )
+    );
   }
 }
 

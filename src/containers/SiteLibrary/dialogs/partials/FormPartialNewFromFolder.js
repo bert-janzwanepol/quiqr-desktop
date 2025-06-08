@@ -1,18 +1,19 @@
 import * as React            from 'react';
 import service               from '../../../../services/service';
 import ScreenShotPlaceholder from '../../../../img-assets/screenshot-placeholder.png';
-import { withStyles }        from '@material-ui/core/styles';
-import Typography            from '@material-ui/core/Typography';
-import Box                   from '@material-ui/core/Box';
-import CircularProgress      from '@material-ui/core/CircularProgress';
-import Table                 from '@material-ui/core/Table';
-import TableRow              from '@material-ui/core/TableRow';
-import TableCell             from '@material-ui/core/TableCell';
-import TableBody             from '@material-ui/core/TableBody';
-import TableContainer        from '@material-ui/core/TableContainer';
-import Card                  from '@material-ui/core/Card';
-import CardContent           from '@material-ui/core/CardContent';
-import CardMedia             from '@material-ui/core/CardMedia';
+// TODO: Convert to sx prop - temporarily disabled
+// import withStyles from '@mui/styles/withStyles';
+import Typography            from '@mui/material/Typography';
+import Box                   from '@mui/material/Box';
+import CircularProgress      from '@mui/material/CircularProgress';
+import Table                 from '@mui/material/Table';
+import TableRow              from '@mui/material/TableRow';
+import TableCell             from '@mui/material/TableCell';
+import TableBody             from '@mui/material/TableBody';
+import TableContainer        from '@mui/material/TableContainer';
+import Card                  from '@mui/material/Card';
+import CardContent           from '@mui/material/CardContent';
+import CardMedia             from '@mui/material/CardMedia';
 import FolderPicker          from '../../../../components/FolderPicker';
 
 const useStyles = theme => ({
@@ -197,5 +198,7 @@ class FormPartialNewFromFolder extends React.Component{
 
 }
 
-export default withStyles(useStyles)(FormPartialNewFromFolder);
+// TODO: Temporarily disabled withStyles - convert to sx prop
+// export default withStyles(useStyles)(FormPartialNewFromFolder);
+export default FormPartialNewFromFolder;
 

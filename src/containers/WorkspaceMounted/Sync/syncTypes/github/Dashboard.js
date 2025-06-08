@@ -1,34 +1,31 @@
 import * as React              from 'react';
-import { withStyles }          from '@material-ui/core/styles';
-import Box                     from '@material-ui/core/Box';
-import Divider                 from '@material-ui/core/Divider';
-import Paper                   from '@material-ui/core/Paper';
-import Tooltip                 from '@material-ui/core/Tooltip';
-import Button                  from '@material-ui/core/Button';
-import ArrowUpwardIcon         from '@material-ui/icons/ArrowUpward';
-import ArrowDownwardIcon       from '@material-ui/icons/ArrowDownward';
-import Typography              from '@material-ui/core/Typography';
-import Timeline                from '@material-ui/lab/Timeline';
-import TimelineItem            from '@material-ui/lab/TimelineItem';
-import TimelineSeparator       from '@material-ui/lab/TimelineSeparator';
-import TimelineConnector       from '@material-ui/lab/TimelineConnector';
-import TimelineContent         from '@material-ui/lab/TimelineContent';
-import TimelineOppositeContent from '@material-ui/lab/TimelineOppositeContent';
-import TimelineDot             from '@material-ui/lab/TimelineDot';
-import NewReleasesIcon         from '@material-ui/icons/NewReleases';
-import GitHubIcon              from '@material-ui/icons/GitHub';
-import CloudUploadIcon         from '@material-ui/icons/CloudUpload';
-import SaveAltIcon             from '@material-ui/icons/SaveAlt';
-import RefreshIcon             from '@material-ui/icons/Refresh';
-import BlockIcon               from '@material-ui/icons/Block';
-import Link                    from '@material-ui/core/Link';
-import SettingsIcon            from '@material-ui/icons/Settings';
+import Box                     from '@mui/material/Box';
+import Divider                 from '@mui/material/Divider';
+import Paper                   from '@mui/material/Paper';
+import Tooltip                 from '@mui/material/Tooltip';
+import Button                  from '@mui/material/Button';
+import ArrowUpwardIcon         from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon       from '@mui/icons-material/ArrowDownward';
+import Typography              from '@mui/material/Typography';
+import Timeline                from '@mui/lab/Timeline';
+import TimelineItem            from '@mui/lab/TimelineItem';
+import TimelineSeparator       from '@mui/lab/TimelineSeparator';
+import TimelineConnector       from '@mui/lab/TimelineConnector';
+import TimelineContent         from '@mui/lab/TimelineContent';
+import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
+import TimelineDot             from '@mui/lab/TimelineDot';
+import NewReleasesIcon         from '@mui/icons-material/NewReleases';
+import GitHubIcon              from '@mui/icons-material/GitHub';
+import CloudUploadIcon         from '@mui/icons-material/CloudUpload';
+import SaveAltIcon             from '@mui/icons-material/SaveAlt';
+import RefreshIcon             from '@mui/icons-material/Refresh';
+import BlockIcon               from '@mui/icons-material/Block';
+import Link                    from '@mui/material/Link';
+import SettingsIcon            from '@mui/icons-material/Settings';
 import Meta                    from './Meta'
 import {snackMessageService}   from '../../../../../services/ui-service';
 import service                 from '../../../../../services/service';
 
-const useStyles = theme => ({
-});
 
 class Dashboard extends React.Component{
 
@@ -251,7 +248,6 @@ class Dashboard extends React.Component{
 
     return (
       <React.Fragment>
-
         <Box component="div" style={{
           display:'flex',
           alignItems: 'flex-start'
@@ -279,9 +275,7 @@ class Dashboard extends React.Component{
               style={{marginRight:'5px'}}
               size="small"
               variant="contained"
-              color="default"
-              startIcon={<SettingsIcon />}
-            >
+              startIcon={<SettingsIcon />}>
               Configure
             </Button>
             <Button
@@ -291,14 +285,11 @@ class Dashboard extends React.Component{
               }}
               size="small"
               variant="contained"
-              color="default"
-              startIcon={<BlockIcon />}
-            >
+              startIcon={<BlockIcon />}>
               Edit ignore list
             </Button>
           </Box>
         </Box>
-
         <Box component="div" style={{
           display:'flex',
           alignItems: 'flex-start'
@@ -368,10 +359,7 @@ class Dashboard extends React.Component{
             :null
           }
         </Box>
-
         <Divider/>
-
-
         <Box component="div"
           m={1}
           style={{
@@ -390,13 +378,10 @@ class Dashboard extends React.Component{
             }}
             size="small"
             variant="contained"
-            color="default"
-            startIcon={<RefreshIcon />}
-          >
+            startIcon={<RefreshIcon />}>
             Refresh History
           </Button>
         </Box>
-
         <Timeline xalign="alternate">
 
           {unpushedChanges ?
@@ -540,20 +525,17 @@ class Dashboard extends React.Component{
               style={{marginRight:'5px'}}
               size="small"
               variant="contained"
-              color="default"
-              startIcon={<RefreshIcon />}
-            >
+              startIcon={<RefreshIcon />}>
               Load More
             </Button>
 
           </Box>:null}
-
       </React.Fragment>
-    )
+    );
   }
 
 }
 
-export default withStyles(useStyles)(Dashboard);
+export default Dashboard;
 
 

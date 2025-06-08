@@ -1,12 +1,8 @@
 import * as React          from 'react';
-import { withStyles }      from '@material-ui/core/styles';
-import Box                 from '@material-ui/core/Box';
-import Paper               from '@material-ui/core/Paper';
-import Typography          from '@material-ui/core/Typography';
-import GitHubIcon          from '@material-ui/icons/GitHub';
-
-const useStyles = theme => ({
-});
+import Box                 from '@mui/material/Box';
+import Paper               from '@mui/material/Paper';
+import Typography          from '@mui/material/Typography';
+import GitHubIcon          from '@mui/icons-material/GitHub';
 
 class CardNew extends React.Component{
 
@@ -16,7 +12,6 @@ class CardNew extends React.Component{
         onClick={()=>{
           this.props.handleClick();
         }}
-        className={this.props.classes.paper}
         elevation={5}
       >
         <Box display="flex" alignItems="center"  justifyContent="center" height={63}>
@@ -36,6 +31,6 @@ class CardNew extends React.Component{
 
 }
 
-export default withStyles(useStyles)(CardNew);
+export default CardNew;
 
 
