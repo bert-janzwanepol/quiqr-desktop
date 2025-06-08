@@ -224,7 +224,15 @@ class NewSiteDialog extends React.Component{
               onClick={()=>{
                 this.setState(source.stateUpdate);
               }}
-              className={classes.paper}
+              sx={{
+                height: "160px",
+                padding: "40px",
+                cursor: "pointer",
+                '&:hover': {
+                  backgroundColor: "#eee",
+                  color: "#222"
+                }
+              }}
               elevation={5}
             >
               <Box display="flex" alignItems="center"  justifyContent="center">

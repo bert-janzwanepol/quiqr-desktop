@@ -3,7 +3,7 @@ import { Switch, Route }                                                  from '
 import AppsIcon                                                           from '@mui/icons-material/Apps';
 import ArrowBackIcon                                                      from '@mui/icons-material/ArrowBack';
 import SettingsApplicationsIcon                                           from '@mui/icons-material/SettingsApplications';
-import { createTheme, ThemeProvider, StyledEngineProvider, adaptV4Theme } from '@mui/material/styles';
+import { createTheme, ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { blue }                                                           from '@mui/material/colors';
 import Workspace                                                          from './containers/WorkspaceMounted/Workspace';
@@ -24,14 +24,14 @@ class App extends React.Component{
 
     let win = window.require('electron').remote.getCurrentWindow();
     let style = require('./app-ui-styles/quiqr10/style-light.js');
-    let theme = createTheme(adaptV4Theme({
+    let theme = createTheme({
       palette: {
         mode: "light",
         primary: {
           main: blue[500],
         },
       },
-    }));
+    });
 
     this.state = {
       splashDialogOpen: false,
@@ -61,14 +61,14 @@ class App extends React.Component{
           themeStyle='dark';
         }
 
-        let theme = createTheme(adaptV4Theme({
+        let theme = createTheme({
           palette: {
             mode: themeStyle,
             primary: {
               main: blue[500],
             },
           },
-        }));
+        });
 
         this.setState({
           style: require('./app-ui-styles/quiqr10/style-'+themeStyle+'.js'),

@@ -1,5 +1,5 @@
 import React             from 'react';
-import ReactDOM          from 'react-dom';
+import { createRoot }    from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom'
 import App               from './App';
 import service           from './services/service';
@@ -16,12 +16,13 @@ service.api.readConfKey('prefs').then((value)=>{
   require('./app-ui-styles/components.css');
 });
 
-ReactDOM.render(
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(
   <BrowserRouter>
     <div>
       <SnackbarManager />
       <App />
     </div>
-  </BrowserRouter>,
-  document.getElementById('root')
+  </BrowserRouter>
 );
