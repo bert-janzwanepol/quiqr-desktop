@@ -4,7 +4,7 @@ sidebar_position: 20
 
 # Configuration Overview
 
-Quiqr Desktop uses a unified configuration system that supports multiple layers of settings, environment variable overrides, and automatic migration from older versions.
+Quiqr Desktop uses a unified configuration system that supports multiple layers of settings and environment variable overrides.
 
 ## Configuration File Locations
 
@@ -38,7 +38,7 @@ The unified configuration system uses these files:
 
 ### Legacy Configuration
 
-Older versions of Quiqr used a single `quiqr-app-config.json` file. When upgrading, this file is automatically migrated to the new format. See [Migration](./migration.md) for details.
+Older versions of Quiqr used a single `quiqr-app-config.json` file. This file is no longer used. All settings now use hardcoded defaults on fresh installation.
 
 ## Configuration Layers
 
@@ -56,6 +56,5 @@ This allows administrators to lock certain settings while still giving users con
 
 - [User Preferences](./preferences.md) - Theme, data folder, and UI settings
 - [Environment Variables](./environment-variables.md) - Override settings via environment
-- [Migration Guide](./migration.md) - Upgrading from older versions
 - [All Settings Reference](./all-settings.md) - Complete settings reference
 - [LLM Providers](./llm-providers.md) - AI assistant configuration

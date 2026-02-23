@@ -132,26 +132,17 @@ The system SHALL support a single-user mode where multi-user features are transp
 
 ---
 
-### Requirement: CONFIG-MIGRATE-001 - Migration from Legacy Format
+### ~~Requirement: CONFIG-MIGRATE-001 - Migration from Legacy Format~~ (REMOVED)
 
-The system SHALL automatically migrate existing `quiqr-app-config.json` configuration to the new unified format on first run.
+**Decision:** No migration will be implemented.
 
-#### Scenario: Successful migration
-- GIVEN an existing `quiqr-app-config.json` in legacy format
-- WHEN the system starts for the first time after upgrade
-- THEN the system SHALL extract user preferences to `user_prefs_default.json`
-- AND extract instance settings to `instance_settings.json`
-- AND preserve the original file as `quiqr-app-config.json.v1-backup`
+**Rationale:**
+- Current user base is small with minimal existing settings
+- Hardcoded defaults provide comprehensive initial configuration
+- Migration complexity not justified by current usage
+- Clean break enables simpler implementation
 
-#### Scenario: Migration marker prevents re-migration
-- GIVEN migration has already been completed
-- WHEN the system starts
-- THEN the system SHALL NOT attempt migration again
-
-#### Scenario: Migration preserves all data
-- GIVEN legacy config with `prefs.interfaceStyle: "quiqr10-dark"`
-- WHEN migration completes
-- THEN `user_prefs_default.json` SHALL contain `preferences.interfaceStyle: "quiqr10-dark"`
+Users will start with fresh configuration using hardcoded defaults when upgrading to the unified configuration system.
 
 ---
 

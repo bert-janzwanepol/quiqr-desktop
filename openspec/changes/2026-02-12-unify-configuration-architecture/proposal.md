@@ -67,7 +67,7 @@ $HOME/.config/quiqr/
 
 ### Breaking Changes
 
-- Migration required from current `quiqr-app-config.json` format
+- **No migration needed** - existing settings are minimal and hardcoded defaults will apply
 - API methods `readConfKey`/`saveConfPrefKey` will need updates
 - Zod schemas in `@quiqr/types` will change significantly
 
@@ -90,7 +90,7 @@ $HOME/.config/quiqr/
 ## Success Criteria
 
 1. All configuration persists correctly across app restarts
-2. Lift-and-shift migration preserves existing user preferences
+2. Hardcoded defaults provide sensible initial values for all settings
 3. Environment variables can override file-based config
 4. Zod schemas fully document the configuration tree
 5. Firefox-style "about:config" property inspection possible

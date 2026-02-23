@@ -26,15 +26,10 @@
 - [x] **T2.6** Write unit tests for environment variable override - `env-override-layer.test.ts` (42 tests)
 - [x] **T2.7** Integrate `UnifiedConfigService` into DI container - `packages/backend/src/config/container.ts`
 
-### Phase 3: Migration System
-> Enable seamless upgrade from legacy configuration
-
-- [x] **T3.1** Create `MigrationDetector` to identify legacy config format (integrated into ConfigMigrator)
-- [x] **T3.2** Create `ConfigMigrator` to transform legacy → unified format - `packages/backend/src/config/config-migrator.ts`
-- [x] **T3.3** Implement backup creation (`*.v1-backup`)
-- [x] **T3.4** Implement migration marker to prevent re-migration (`.migration-complete`)
-- [x] **T3.5** Write migration tests with sample legacy configs - `config-migrator.test.ts` (31 tests)
-- [x] **T3.6** Document migration mapping in code comments
+### Phase 3: ~~Migration System~~ (REMOVED - No migration needed)
+> **DECISION:** No migration will be implemented. Relying on hardcoded defaults instead.
+>
+> Rationale: Minimal existing settings + comprehensive defaults = migration not justified
 
 ### Phase 4: API Integration
 > Expose unified config through backend API
@@ -59,45 +54,54 @@
 ### Phase 6: Documentation & Validation
 > Ensure the system is properly documented and tested
 
-- [x] **T6.1** Update `packages/docs/` with configuration guide - `docs/configuration/index.md`, `preferences.md` updated
-- [x] **T6.2** Document environment variable mapping - `docs/configuration/environment-variables.md` created
-- [x] **T6.3** Document migration process for users - `docs/configuration/migration.md` created
-- [x] **T6.4** Integration test: fresh install → configure → restart - `fresh-install.test.ts` (9 tests)
-- [x] **T6.5** Integration test: legacy install → upgrade → verify migration - `legacy-migration.test.ts` (16 tests)
-- [x] **T6.6** Update `AGENTS.md` configuration section - Unified Configuration System section added
+- [x] **T6.1** Update `packages/docs/` with configuration guide - Updated `configuration/index.md` to remove migration references
+- [x] **T6.2** Document environment variable mapping - `docs/configuration/environment-variables.md` exists
+- [x] ~~**T6.3** Document migration process~~ (REMOVED - migration.md deleted)
+- [x] **T6.4** Integration test: fresh install → configure → restart - `fresh-install.test.ts` exists (9 tests)
+- [x] ~~**T6.5** Integration test: legacy migration~~ (REMOVED - test file deleted)
+- [x] **T6.6** Update `AGENTS.md` configuration section - Unified Configuration System section exists
 
 ---
 
 ## Implementation Summary
 
-### Files Created
+### Files Created ✅
 
-| File | Description |
-|------|-------------|
-| `packages/types/src/schemas/config.ts` | Extended with `instanceSettingsSchema`, `userConfigSchema`, `siteSettingsSchema`, env mappings |
-| `packages/types/src/schemas/api.ts` | Extended with unified config API schemas |
-| `packages/backend/src/config/config-store.ts` | File-based config persistence (instance, user, site) |
-| `packages/backend/src/config/env-override-layer.ts` | Environment variable override handling |
-| `packages/backend/src/config/config-resolver.ts` | 4-layer precedence resolution |
-| `packages/backend/src/config/unified-config-service.ts` | High-level config API |
-| `packages/backend/src/config/config-migrator.ts` | Legacy config migration |
+| File | Description | Status |
+|------|-------------|--------|
+| `packages/types/src/schemas/config.ts` | Extended with `instanceSettingsSchema`, `userConfigSchema`, `siteSettingsSchema`, env mappings | ✅ Created |
+| `packages/types/src/schemas/api.ts` | Extended with unified config API schemas | ✅ Extended |
+| `packages/backend/src/config/config-store.ts` | File-based config persistence (instance, user, site) | ✅ Created |
+| `packages/backend/src/config/env-override-layer.ts` | Environment variable override handling | ✅ Created |
+| `packages/backend/src/config/config-resolver.ts` | 4-layer precedence resolution | ✅ Created |
+| `packages/backend/src/config/unified-config-service.ts` | High-level config API | ✅ Created |
 
-### Files Modified
+### Files Modified ✅
 
-| File | Changes |
-|------|---------|
-| `packages/backend/src/config/container.ts` | Added `unifiedConfig` service, migration on startup |
-| `packages/backend/src/config/index.ts` | Exported new modules |
-| `packages/backend/src/api/handlers/config-handlers.ts` | Added 16 new unified config handlers |
-| `packages/frontend/src/api.ts` | Added 16 new frontend API methods |
+| File | Changes | Status |
+|------|---------|--------|
+| `packages/backend/src/config/container.ts` | Added `unifiedConfig` service (removed migration startup logic) | ✅ Updated |
+| `packages/backend/src/config/index.ts` | Exported new modules (removed config-migrator export) | ✅ Updated |
+| `packages/backend/src/api/handlers/config-handlers.ts` | Added new unified config handlers | ✅ Updated |
+| `packages/frontend/src/api.ts` | Added new frontend API methods | ✅ Updated |
+| `packages/docs/docs/configuration/index.md` | Removed migration references | ✅ Updated |
 
-### Architecture Implemented
+### Files Deleted ✅
+
+| File | Reason |
+|------|--------|
+| `packages/backend/src/config/config-migrator.ts` | Migration no longer needed |
+| `packages/backend/src/config/__tests__/config-migrator.test.ts` | Migration tests no longer needed (31 tests removed) |
+| `packages/backend/src/config/__tests__/integration/legacy-migration.test.ts` | Migration integration tests no longer needed (16 tests removed) |
+| `packages/docs/docs/configuration/migration.md` | Migration documentation no longer needed |
+
+### Architecture to Implement
 
 - **4-layer resolution**: App Defaults → Instance Defaults → User Preferences → Instance Forced
 - **File storage**: `~/.config/quiqr/` with `instance_settings.json`, `user_prefs_[user].json`, `site_settings_[sitekey].json`
 - **Environment override**: `QUIQR_*` env vars override file config
-- **Migration**: Auto-migrates `quiqr-app-config.json` with `.v1-backup`
-- **Backward compatibility**: Legacy `readConfKey`/`saveConfPrefKey` API preserved
+- ~~**Migration**~~: No migration - fresh start with hardcoded defaults
+- **Backward compatibility**: Legacy `readConfKey`/`saveConfPrefKey` API can be updated or deprecated
 
 ---
 
@@ -106,7 +110,6 @@
 | Task | Depends On |
 |------|------------|
 | T2.* | T1.* (schemas must exist first) |
-| T3.* | T2.1, T2.4 (needs config store and service) |
 | T4.* | T2.* (API wraps service) |
 | T5.* | T4.* (frontend uses API) |
 | T6.* | All phases complete |
@@ -115,28 +118,29 @@
 
 - **T1.1-T1.6** can be done in parallel (schema definitions)
 - **T2.1-T2.3** can be done in parallel (independent classes)
-- **T3.1-T3.4** can be done in parallel after T2.1
 - **T4.2-T4.6** can be done in parallel (API endpoints)
 - **T5.1-T5.3** can be done in parallel (frontend updates)
 
-## Validation Checkpoints
+## Validation Checkpoints ✅
 
 1. After Phase 1: `npm run build -w @quiqr/types` succeeds ✅
-2. After Phase 2: Unit tests for config resolution pass ✅ (14 tests)
-3. After Phase 3: Migration tests pass with legacy configs ✅ (31 tests)
+2. After Phase 2: Unit tests for config resolution pass ✅ (56 tests total: 14 resolver + 42 env-override)
+3. ~~After Phase 3: Migration tests~~ (REMOVED - 47 migration tests deleted)
 4. After Phase 4: API integration tests pass ✅ (29 tests)
 5. After Phase 5: `npm run dev` works with new config ✅
-6. After Phase 6: Documentation builds, all tests green ✅ (164 tests total)
+6. After Phase 6: Documentation updated, all tests pass ✅ (495 backend tests total)
 
-## Implementation Complete
+**Final Test Status**: All 495 backend tests passing (26 test suites) with migration code removed.
 
-All tasks have been completed:
+## Implementation Status
 
-- [x] Phase 1: Schema Foundation (7 tasks)
-- [x] Phase 2: Config Services (7 tasks) - 56 unit tests
-- [x] Phase 3: Migration System (6 tasks) - 31 unit tests
-- [x] Phase 4: API Integration (7 tasks) - 29 unit tests
-- [x] Phase 5: Frontend Updates (5 tasks)
-- [x] Phase 6: Documentation & Validation (6 tasks) - 25 integration tests
+Task phases:
 
-**Total: 164 tests passing**
+- [x] Phase 1: Schema Foundation (7 tasks) - All completed
+- [x] Phase 2: Config Services (7 tasks) - All completed (56 unit tests)
+- [x] ~~Phase 3: Migration System~~ (REMOVED - migration code deleted)
+- [x] Phase 4: API Integration (7 tasks) - All completed (29 unit tests)
+- [x] Phase 5: Frontend Updates (5 tasks) - All completed
+- [x] Phase 6: Documentation & Validation (4 remaining tasks) - All completed
+
+**Implementation Complete**: All unified configuration system tasks finished. Migration requirement removed from artifacts and source code.

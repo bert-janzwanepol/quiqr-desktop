@@ -181,34 +181,28 @@ const userConfigSchema = z.object({
 - Runtime validation of config files
 - Self-documenting configuration structure
 
-### ADR-6: Migration Strategy
+### ADR-6: No Migration - Hardcoded Defaults
 
-**Context:** Existing users have preferences in `quiqr-app-config.json`.
+**Context:** Existing users have minimal settings in `quiqr-app-config.json`, and the current system has comprehensive hardcoded defaults.
 
-**Decision:** Implement automatic migration on first run with new version:
+**Decision:** Do not implement automatic migration. Instead:
 
-1. Detect old config format
-2. Extract user preferences → `user_prefs_default.json`
-3. Extract instance-level settings → `instance_settings.json`
-4. Preserve old file as backup: `quiqr-app-config.json.v1-backup`
-5. Write migration marker to prevent re-migration
+1. Rely on hardcoded defaults for all initial values
+2. Old config files are ignored (not read or migrated)
+3. Users start with fresh configuration using new structure
+4. All settings have sensible defaults, so no data loss
 
-**Mapping:**
-```
-OLD                           → NEW
-lastOpenedSite               → instance.users[key].lastOpenedSite
-prefs.*                      → user_prefs_default.preferences.*
-skipWelcomeScreen            → user_prefs_default.preferences.skipWelcomeScreen
-experimentalFeatures         → instance.settings.experimentalFeatures
-devLocalApi                  → instance.settings.dev.localApi
-hugoServeDraftMode           → instance.sites[key].hugo.serveDraftMode 
-lastOpenedPublishTargetForSite → instance.sites[key].lastPublishTarget
-```
+**Rationale:**
+- Current user base is small and settings are minimal
+- Hardcoded defaults already provide complete initial configuration
+- Migration complexity not justified by current usage
+- Clean break enables simpler implementation
 
 **Consequences:**
-- Zero data loss for existing users
-- Rollback possible via backup file
-- Clear mapping enables automated validation
+- Users will see default settings on first run with new version
+- No risk of migration bugs or edge cases
+- Simpler codebase without migration logic
+- Users can reconfigure their preferences (minimal effort given limited current settings)
 
 ## Component Interactions
 
