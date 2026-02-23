@@ -399,6 +399,28 @@ export function createIsExperimentalFeaturesEnabledHandler(container: AppContain
 }
 
 /**
+ * Get the storage path from application configuration
+ */
+export function createGetStoragePathHandler(container: AppContainer) {
+  return async () => {
+    return {
+      path: container.config.prefs.dataFolder,
+    };
+  };
+}
+
+/**
+ * Set the storage path in application configuration
+ */
+export function createSetStoragePathHandler(container: AppContainer) {
+  return async ({ path }: { path: string }) => {
+    container.config.setPrefKey('dataFolder', path);
+    await container.config.save();
+    return true;
+  };
+}
+
+/**
  * Create all config-related handlers
  */
 export function createConfigHandlers(container: AppContainer) {
@@ -441,5 +463,9 @@ export function createConfigHandlers(container: AppContainer) {
     switchUser: createSwitchUserHandler(container),
     listUsers: createListUsersHandler(container),
     isExperimentalFeaturesEnabled: createIsExperimentalFeaturesEnabledHandler(container),
+
+    // Storage path handlers
+    getStoragePath: createGetStoragePathHandler(container),
+    setStoragePath: createSetStoragePathHandler(container),
   };
 }

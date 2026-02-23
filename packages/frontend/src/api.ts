@@ -603,6 +603,20 @@ export function getEnvironmentInfo() {
 }
 
 /**
+ * Get the storage path from application configuration
+ */
+export function getStoragePath() {
+  return request('getStoragePath', {});
+}
+
+/**
+ * Set the storage path in application configuration
+ */
+export function setStoragePath(path: string) {
+  return request('setStoragePath', { path });
+}
+
+/**
    * Get current menu state (for web mode)
    */
 export function getMenuState() {

@@ -299,6 +299,15 @@ export const scaffoldResultSchema = z.object({
   error: z.string().optional()
 })
 
+// Storage path schemas
+export const setStoragePathRequestSchema = z.object({
+  path: z.string()
+})
+
+export const getStoragePathResponseSchema = z.object({
+  path: z.string()
+})
+
 // API Schemas mapping - maps API method names to their response schemas
 export const apiSchemas = {
   // Workspace operations
@@ -398,6 +407,8 @@ export const apiSchemas = {
   matchRole: z.boolean(),
   invalidateCache: z.boolean(),
   getEnvironmentInfo: environmentInfoSchema,
+  getStoragePath: getStoragePathResponseSchema,
+  setStoragePath: z.boolean(),
 
   // Hugo operations
   stopHugoServer: hugoServerResponseSchema,
@@ -490,6 +501,8 @@ export type EnvironmentInfo = z.infer<typeof environmentInfoSchema>
 export type UploadFileToBundlePathResponse = z.infer<typeof uploadFileToBundlePathResponseSchema>
 export type AiPromptResponse = z.infer<typeof aiPromptResponseSchema>
 export type FrontMatterContent = z.infer<typeof frontMatterContentSchema>
+export type SetStoragePathRequest = z.infer<typeof setStoragePathRequestSchema>
+export type GetStoragePathResponse = z.infer<typeof getStoragePathResponseSchema>
 
 // This type includes all the api method names
 export type ApiMethod = keyof typeof apiSchemas
