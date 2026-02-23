@@ -19,6 +19,7 @@
  * ```
  */
 
+import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   configQueryOptions,
@@ -40,6 +41,16 @@ import {
  */
 export function useConfigurations(invalidateCache = false) {
   return useQuery(configQueryOptions.all(invalidateCache));
+}
+
+/**
+ * Returns a stable callback that invalidates the configurations query
+ */
+export function useInvalidateConfigurations() {
+  const queryClient = useQueryClient();
+  return useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['getConfigurations'] });
+  }, [queryClient]);
 }
 
 /**

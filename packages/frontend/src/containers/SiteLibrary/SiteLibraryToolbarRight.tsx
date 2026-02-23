@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router";
+import { useInvalidateConfigurations } from "../../queries/hooks";
 import { ToolbarButton, ToolbarToggleButtonGroup } from "../TopToolbarRight";
 import AppsIcon from "@mui/icons-material/Apps";
 import SettingsApplicationsIcon from "@mui/icons-material/SettingsApplications";
@@ -9,7 +10,6 @@ import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
 import { useDialog } from "../../hooks/useDialog";
 import { useToolbarActiveStates } from "../../hooks/useToolbarActiveStates";
-import service from "../../services/service";
 
 interface SiteLibraryToolbarItemsProps {
   activeLibraryView: string;
@@ -26,7 +26,8 @@ export const useSiteLibraryToolbarItems = ({
 }: SiteLibraryToolbarItemsProps) => {
   const navigate = useNavigate();
   const { openDialog } = useDialog();
-  
+  const invalidateConfigurations = useInvalidateConfigurations();
+
   // Get active states from shared hook
   const { isSiteLibraryActive, isApplicationLogsActive, isPreferencesActive } = useToolbarActiveStates();
 
@@ -36,11 +37,9 @@ export const useSiteLibraryToolbarItems = ({
       action={() => openDialog('NewSlashImportSiteDialog', {
         newOrImport: 'new',
         mountSite: (siteKey: string) => {
-          // Clear cache to ensure new site is in configurations
-          service.clearCache();
           navigate(`/sites/${siteKey}/workspaces/main`);
         },
-        onSuccess: () => {}
+        onSuccess: invalidateConfigurations,
       })}
       title='New'
       icon={AddIcon}
@@ -50,11 +49,9 @@ export const useSiteLibraryToolbarItems = ({
       action={() => openDialog('NewSlashImportSiteDialog', {
         newOrImport: 'import',
         mountSite: (siteKey: string) => {
-          // Clear cache to ensure new site is in configurations
-          service.clearCache();
           navigate(`/sites/${siteKey}/workspaces/main`);
         },
-        onSuccess: () => {}
+        onSuccess: invalidateConfigurations,
       })}
       title='Import'
       icon={InputIcon}

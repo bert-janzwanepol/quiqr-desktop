@@ -1,12 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import service from '../../../services/service';
 import { configQueryOptions } from '../../../queries/options';
+import { useInvalidateConfigurations } from '../../../queries/hooks';
 import * as api from '../../../api';
 
 export function useSiteLibraryData() {
-  const queryClient = useQueryClient();
   const [sitesListingView, setSitesListingView] = useState('');
+  const invalidate = useInvalidateConfigurations();
 
   const { data: configurations = { sites: [] }, isError, error } = useQuery(configQueryOptions.all());
 
@@ -24,10 +25,6 @@ export function useSiteLibraryData() {
       }
     });
   }, []);
-
-  const invalidate = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['getConfigurations'] });
-  }, [queryClient]);
 
   return {
     configurations,
