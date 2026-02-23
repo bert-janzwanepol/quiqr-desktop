@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Routes, Route, useParams, useNavigate } from "react-router";
 import { ThemeProvider, StyledEngineProvider, Theme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import Box from "@mui/material/Box";
 import Workspace from "./containers/WorkspaceMounted/Workspace";
 import DashboardRoute from "./containers/WorkspaceMounted/components/DashboardRoute";
 import CollectionRoute from "./containers/WorkspaceMounted/components/CollectionRoute";
@@ -54,6 +53,41 @@ const ConsoleRedirectHandler = ({ children }: { children: React.ReactNode }) => 
   return <>{children}</>;
 };
 
+interface MainLayoutWrapperProps {
+  theme: Theme;
+  libraryView: string;
+  onLibraryViewChange: (view: string) => void;
+}
+
+const MainLayoutWrapper = ({ theme, libraryView, onLibraryViewChange }: MainLayoutWrapperProps) => (
+  <ConsoleRedirectHandler>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Routes>
+          <Route path="/prefs/*" element={<PrefsLayout />} />
+          <Route path="/sites/*" element={
+            <SiteLibraryLayout
+              libraryView={libraryView}
+              onLibraryViewChange={onLibraryViewChange}
+            >
+              <SiteLibraryRouted activeLibraryView={libraryView} />
+            </SiteLibraryLayout>
+          } />
+          <Route path="*" element={
+            <SiteLibraryLayout
+              libraryView={libraryView}
+              onLibraryViewChange={onLibraryViewChange}
+            >
+              <SiteLibraryRouted activeLibraryView={libraryView} />
+            </SiteLibraryLayout>
+          } />
+        </Routes>
+      </ThemeProvider>
+    </StyledEngineProvider>
+  </ConsoleRedirectHandler>
+);
+
 // Inner component that has access to useDialog
 const AppContent = ({ theme }: { theme: Theme }) => {
   const { openDialog } = useDialog();
@@ -95,41 +129,10 @@ const AppContent = ({ theme }: { theme: Theme }) => {
     });
   }, [openDialog]);
 
-  const handleLibraryViewChange = (view: string) => {
+  const handleLibraryViewChange = useCallback((view: string) => {
     service.api.saveConfPrefKey("libraryView", view);
     setLibraryView(view);
-  };
-
-
-  // Main layout wrapper
-  const MainLayoutWrapper = () => (
-    <ConsoleRedirectHandler>
-      <StyledEngineProvider injectFirst>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Routes>
-            <Route path="/prefs/*" element={<PrefsLayout />} />
-            <Route path="/sites/*" element={
-              <SiteLibraryLayout
-                libraryView={libraryView}
-                onLibraryViewChange={handleLibraryViewChange}
-              >
-                <SiteLibraryRouted activeLibraryView={libraryView} />
-              </SiteLibraryLayout>
-            } />
-            <Route path="*" element={
-              <SiteLibraryLayout
-                libraryView={libraryView}
-                onLibraryViewChange={handleLibraryViewChange}
-              >
-                <SiteLibraryRouted activeLibraryView={libraryView} />
-              </SiteLibraryLayout>
-            } />
-          </Routes>
-        </ThemeProvider>
-      </StyledEngineProvider>
-    </ConsoleRedirectHandler>
-  );
+  }, []);
 
   return (
     <Routes>
@@ -184,7 +187,7 @@ const AppContent = ({ theme }: { theme: Theme }) => {
       />
 
       {/* All other routes use AppLayout */}
-      <Route path="*" element={<MainLayoutWrapper />} />
+      <Route path="*" element={<MainLayoutWrapper theme={theme} libraryView={libraryView} onLibraryViewChange={handleLibraryViewChange} />} />
     </Routes>
   );
 };

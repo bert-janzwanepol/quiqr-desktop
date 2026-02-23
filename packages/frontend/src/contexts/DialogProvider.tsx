@@ -25,12 +25,10 @@ export function DialogProvider({ children }: DialogProviderProps) {
   const openDialog = useCallback<DialogContextValue['openDialog']>(
     (component, props) => {
       const id = `dialog-${++dialogIdCounter.current}`;
-      const priority = dialogs.length; // Higher priority = more recent = higher z-index
-
-      setDialogs(prev => [...prev, { id, component, props, priority }]);
+      setDialogs(prev => [...prev, { id, component, props, priority: prev.length }]);
       return id;
     },
-    [dialogs.length]
+    []
   );
 
   const closeDialog = useCallback((id?: string) => {

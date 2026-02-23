@@ -19,7 +19,7 @@ const SiteLibraryContent = ({
   sourceArgument,
   activeLibraryView,
 }: SiteLibraryContentProps) => {
-  const { configurations, quiqrCommunityTemplates, sitesListingView, error: quiqrCommunityTemplatesError, updateLocalSites } = useSiteLibraryData();
+  const { configurations, quiqrCommunityTemplates, sitesListingView, error: quiqrCommunityTemplatesError, invalidate } = useSiteLibraryData();
   const { openDialog } = useDialog();
 
   const { mountSiteByKey, mountSite } = useSiteOperations();
@@ -28,15 +28,13 @@ const SiteLibraryContent = ({
 
   const handleSiteClick = (site: SiteConfig) => {
     if (site.template) {
-      // Template site - open import dialog
       openDialog('NewSlashImportSiteDialog', {
         newOrImport: 'import',
         importSiteURL: site.importSiteURL,
         mountSite: mountSiteByKey,
-        onSuccess: () => updateLocalSites()
+        onSuccess: invalidate,
       });
     } else {
-      // Regular site - mount it
       mountSite(site);
     }
   };
@@ -44,28 +42,16 @@ const SiteLibraryContent = ({
   const handleMenuAction = (action: string, site: SiteConfig) => {
     switch (action) {
       case "rename":
-        openDialog('RenameSiteDialog', {
-          siteconf: site,
-          onSuccess: () => updateLocalSites()
-        });
+        openDialog('RenameSiteDialog', { siteconf: site, onSuccess: invalidate });
         break;
       case "copy":
-        openDialog('CopySiteDialog', {
-          siteconf: site,
-          onSuccess: () => updateLocalSites()
-        });
+        openDialog('CopySiteDialog', { siteconf: site, onSuccess: invalidate });
         break;
       case "editTags":
-        openDialog('EditSiteTagsDialogs', {
-          siteconf: site,
-          onSuccess: () => updateLocalSites()
-        });
+        openDialog('EditSiteTagsDialogs', { siteconf: site, onSuccess: invalidate });
         break;
       case "delete":
-        openDialog('DeleteSiteDialog', {
-          siteconf: site,
-          onSuccess: () => updateLocalSites()
-        });
+        openDialog('DeleteSiteDialog', { siteconf: site, onSuccess: invalidate });
         break;
       case "import":
         handleSiteClick(site);

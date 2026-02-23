@@ -1,59 +1,36 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import service from '../../../services/service';
-import { Configurations, CommunityTemplate } from '../../../../types';
+import { configQueryOptions } from '../../../queries/options';
+import { useInvalidateConfigurations } from '../../../queries/hooks';
+import * as api from '../../../api';
 
 export function useSiteLibraryData() {
-  const [configurations, setConfigurations] = useState<Configurations>({ sites: [] });
-  const [quiqrCommunityTemplates, setQuiqrCommunityTemplates] = useState<CommunityTemplate[]>([]);
-  const [localsites, setLocalsites] = useState<string[]>([]);
   const [sitesListingView, setSitesListingView] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [loading, _setLoading] = useState(false);
+  const invalidate = useInvalidateConfigurations();
 
-  const updateLocalSites = useCallback(() => {
-    const sites: string[] = [];
-    service.getConfigurations(true).then((configs) => {
-      configs.sites.forEach((site) => {
-        sites.push(site.name);
-      });
+  const { data: configurations = { sites: [] }, isError, error } = useQuery(configQueryOptions.all());
 
-      setLocalsites(sites);
-      setConfigurations(configs);
-    });
-  }, []);
-
-  const updateCommunityTemplates = useCallback(() => {
-    service.api
-      .updateCommunityTemplates()
-      .then(data => {
-        setError(null);
-        setQuiqrCommunityTemplates(data);
-      })
-      .catch((e: Error) => {
-        setError(e.message);
-      });
-  }, []);
+  const { data: quiqrCommunityTemplates = [], error: communityError } = useQuery({
+    queryKey: ['communityTemplates'] as const,
+    queryFn: () => api.updateCommunityTemplates(),
+    staleTime: 10 * 60 * 1000, // 10 minutes - remote template list is slow to change
+  });
 
   useEffect(() => {
-    updateLocalSites();
-    updateCommunityTemplates();
     service.api.stopHugoServer();
-
     service.api.readConfPrefKey('sitesListingView').then((view) => {
       if (typeof view === 'string') {
         setSitesListingView(view);
       }
     });
-  }, [updateLocalSites, updateCommunityTemplates]);
+  }, []);
 
   return {
     configurations,
     quiqrCommunityTemplates,
-    localsites,
     sitesListingView,
-    error,
-    loading,
-    updateLocalSites,
-    updateCommunityTemplates
+    error: isError ? String(error) : communityError ? (communityError as Error).message : null,
+    invalidate,
   };
 }

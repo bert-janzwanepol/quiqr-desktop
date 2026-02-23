@@ -1,13 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardHeader from '@mui/material/CardHeader';
 import CardMedia from '@mui/material/CardMedia';
 import Avatar from '@mui/material/Avatar';
 import { red } from '@mui/material/colors';
-import service from '../../../services/service';
 import ScreenShotPlaceholder from '../../../img-assets/screenshot-placeholder.png';
 import { SiteConfig } from '../../../../types';
+import { bundleQueryOptions } from '../../../queries/options';
 
 interface CardItemProps {
   site: SiteConfig;
@@ -17,52 +18,23 @@ interface CardItemProps {
 }
 
 function CardItem({ site, siteClick, itemMenuButton, itemMenuItems }: CardItemProps) {
-  const [screenshot, setScreenshot] = useState(ScreenShotPlaceholder);
-  const [favicon, setFavicon] = useState('');
-  const isMountedRef = useRef(true);
+  const screenshotPath = site.etalage?.screenshots?.[0];
+  const faviconPath = site.etalage?.favicons?.[0];
 
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
+  const { data: screenshotData } = useQuery({
+    ...bundleQueryOptions.thumbnail(site.key, 'source', screenshotPath ?? ''),
+    enabled: !site.screenshotURL && !!screenshotPath,
+    staleTime: Infinity,
+  });
 
-  useEffect(() => {
-    const fetchScreenshot = async () => {
-      if (site.screenshotURL) {
-        if (isMountedRef.current) {
-          setScreenshot(site.screenshotURL);
-        }
-      } else if (site.etalage?.screenshots && site.etalage.screenshots.length > 0) {
-        const img = await service.api.getThumbnailForPath(site.key, 'source', site.etalage.screenshots[0]);
-        if (isMountedRef.current) {
-          setScreenshot(img);
-        }
-      } else {
-        if (isMountedRef.current) {
-          setScreenshot(ScreenShotPlaceholder);
-        }
-      }
-    };
-    fetchScreenshot();
-  }, [site.key, site.screenshotURL, site.etalage?.screenshots]);
+  const { data: faviconData } = useQuery({
+    ...bundleQueryOptions.thumbnail(site.key, 'source', faviconPath ?? ''),
+    enabled: !!faviconPath,
+    staleTime: Infinity,
+  });
 
-  useEffect(() => {
-    const fetchFavicon = async () => {
-      if (site.etalage?.favicons && site.etalage.favicons.length > 0) {
-        const img = await service.api.getThumbnailForPath(site.key, 'source', site.etalage.favicons[0]);
-        if (isMountedRef.current) {
-          setFavicon(img);
-        }
-      } else {
-        if (isMountedRef.current) {
-          setFavicon('');
-        }
-      }
-    };
-    fetchFavicon();
-  }, [site.key, site.etalage?.favicons]);
+  const screenshot = site.screenshotURL ?? screenshotData ?? ScreenShotPlaceholder;
+  const favicon = faviconData ?? '';
 
   const siteAvatar =
     favicon !== '' ? (

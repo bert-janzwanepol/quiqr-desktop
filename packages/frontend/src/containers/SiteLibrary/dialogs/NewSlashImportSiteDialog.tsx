@@ -141,7 +141,6 @@ const NewSiteDialog = ({
 
   const handleOpenSite = () => {
     if (state.createdSiteKey) {
-      onSuccess();
       mountSite(state.createdSiteKey);
       onClose();
     }
@@ -241,6 +240,7 @@ const NewSiteDialog = ({
       if (siteKey) {
         dispatch({ type: "SET_CREATED_SITE_KEY", payload: siteKey });
         dispatch({ type: "SET_ACTIVE_STEP", payload: finalStepIndex });
+        onSuccess();
       }
     } catch {
       dispatch({ type: "SET_CREATING", payload: false });
