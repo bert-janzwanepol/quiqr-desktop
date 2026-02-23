@@ -1,13 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import { red } from '@mui/material/colors';
-import service from '../../../services/service';
 import { SiteConfig } from '../../../../types';
+import { bundleQueryOptions } from '../../../queries/options';
 
 interface SiteListItemProps {
   site: SiteConfig;
@@ -17,31 +17,15 @@ interface SiteListItemProps {
 }
 
 function SiteListItem({ site, siteClick, itemMenuButton, itemMenuItems }: SiteListItemProps) {
-  const [favicon, setFavicon] = useState('');
-  const isMountedRef = useRef(true);
+  const faviconPath = site.etalage?.favicons?.[0];
 
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
+  const { data: faviconData } = useQuery({
+    ...bundleQueryOptions.thumbnail(site.key, 'source', faviconPath ?? ''),
+    enabled: !!faviconPath,
+    staleTime: Infinity,
+  });
 
-  useEffect(() => {
-    const fetchFavicon = async () => {
-      if (site.etalage?.favicons && site.etalage.favicons.length > 0) {
-        const img = await service.api.getThumbnailForPath(site.key, 'source', site.etalage.favicons[0]);
-        if (isMountedRef.current) {
-          setFavicon(img);
-        }
-      } else {
-        if (isMountedRef.current) {
-          setFavicon('');
-        }
-      }
-    };
-    fetchFavicon();
-  }, [site.key, site.etalage?.favicons]);
+  const favicon = faviconData ?? '';
 
   const siteAvatar =
     favicon !== '' ? (
@@ -58,9 +42,7 @@ function SiteListItem({ site, siteClick, itemMenuButton, itemMenuItems }: SiteLi
         id={'list-siteselectable-' + site.name}
         key={'sitelistitem-' + site.key}
         disablePadding
-        secondaryAction={
-          site.remote ? null : <ListItemSecondaryAction>{itemMenuButton}</ListItemSecondaryAction>
-        }
+        secondaryAction={site.remote ? null : itemMenuButton}
       >
         <ListItemButton onClick={siteClick}>
           <ListItemAvatar>{siteAvatar}</ListItemAvatar>
