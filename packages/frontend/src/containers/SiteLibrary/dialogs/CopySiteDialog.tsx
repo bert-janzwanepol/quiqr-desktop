@@ -1,4 +1,6 @@
+import { useState } from "react";
 import service from "../../../services/service";
+import { useConfigurations } from "../../../queries/hooks";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -8,7 +10,6 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import CircularProgress from "@mui/material/CircularProgress";
 import { SiteConfig } from "../../../../types";
-import { useCallback, useState, useEffect } from "react";
 
 interface CopyDialogProps {
   open: boolean;
@@ -19,49 +20,24 @@ interface CopyDialogProps {
 
 const CopyDialog = ({ open, siteconf, onSuccess, onClose }: CopyDialogProps) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>("");
-  const [localsites, setLocalsites] = useState<string[]>([]);
+  const [error, setError] = useState("");
   const [editedName, setEditedName] = useState(siteconf.name + " (copy)");
 
-  const editedSiteConf = {
-    ...siteconf,
-    name: editedName,
-    key: editedName,
-  };
+  // Read site names directly from the TanStack Query cache — no separate fetch needed
+  const { data: configurations } = useConfigurations();
+  const existingNames = configurations?.sites.map(s => s.name) ?? [];
 
-  // Fetch local sites when dialog opens
-  useEffect(() => {
-    if (open) {
-      service.getConfigurations().then((configurations) => {
-        setLocalsites(configurations.sites.map((site) => site.name));
-      });
-    }
-  }, [open]);
+  const nameAlreadyUsed = existingNames.includes(editedName);
 
-  const execButtonsDisabled = !siteconf.key || error !== "";
-
-  const validateSiteName = useCallback(
-    (newName: string) => {
-      if (!(localsites && localsites.includes(newName))) {
-        setError("");
-        return;
-      }
-
-      setError("Name is already used.");
-    },
-    [localsites]
-  );
+  const editedSiteConf = { ...siteconf, name: editedName, key: editedName };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newName = e.target.value;
-    setEditedName(newName);
-    validateSiteName(newName);
+    setEditedName(e.target.value);
+    setError("");
   };
 
   const saveSiteConf = async () => {
-    if (!editedSiteConf.key) {
-      return;
-    }
+    if (!editedSiteConf.key || nameAlreadyUsed) return;
 
     setLoading(true);
     setError("");
@@ -88,18 +64,16 @@ const CopyDialog = ({ open, siteconf, onSuccess, onClose }: CopyDialogProps) => 
             fullWidth
             value={editedName}
             onChange={handleNameChange}
-            error={error !== ""}
-            helperText={error}
+            error={nameAlreadyUsed}
+            helperText={nameAlreadyUsed ? "Name is already used." : error}
             disabled={loading}
-            sx={{
-              marginTop: (theme) => theme.spacing(1),
-            }}
+            sx={{ marginTop: (theme) => theme.spacing(1) }}
           />
         </DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>Cancel</Button>
-        <Button disabled={execButtonsDisabled || loading} onClick={saveSiteConf}>
+        <Button disabled={nameAlreadyUsed || loading} onClick={saveSiteConf}>
           {loading ? <CircularProgress size={20} /> : 'Save'}
         </Button>
       </DialogActions>

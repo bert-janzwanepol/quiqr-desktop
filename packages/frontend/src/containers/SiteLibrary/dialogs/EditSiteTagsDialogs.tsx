@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
 import service from "../../../services/service";
 import Chips from "../../../components/Chips";
 import Button from "@mui/material/Button";
@@ -21,7 +20,6 @@ interface EditTagsDialogsProps {
 }
 
 const EditSiteTagsDialogs = ({ open, siteconf, onSuccess, onClose }: EditTagsDialogsProps) => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [execButtonsDisabled, setExecButtonsDisabled] = useState(true);
@@ -68,8 +66,6 @@ const EditSiteTagsDialogs = ({ open, siteconf, onSuccess, onClose }: EditTagsDia
 
     try {
       await service.api.saveSiteConf(editedSiteConf.key, editedSiteConf);
-      // Navigate to refresh the site library view
-      navigate("/sites/last");
       onSuccess();
       onClose();
     } catch (err) {

@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import service from "../../../services/service";
+import { useConfigurations } from "../../../queries/hooks";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
@@ -22,48 +23,22 @@ interface RenameDialogProps {
 const RenameDialog = ({ open, siteconf, onSuccess, onClose }: RenameDialogProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [localsites, setLocalsites] = useState<string[]>([]);
-  const [execButtonsDisabled, setExecButtonsDisabled] = useState(false);
-  const [errorTextSiteName, setErrorTextSiteName] = useState("");
   const [editedName, setEditedName] = useState(siteconf.name);
 
-  const editedSiteConf = {
-    ...siteconf,
-    name: editedName,
-  };
+  // Read site names directly from the TanStack Query cache — no separate fetch needed
+  const { data: configurations } = useConfigurations();
+  const existingNames = configurations?.sites.map(s => s.name) ?? [];
 
-  // Fetch local sites when dialog opens
-  useEffect(() => {
-    if (open) {
-      service.getConfigurations().then((configurations) => {
-        setLocalsites(configurations.sites.map(site => site.name));
-      });
-    }
-  }, [open]);
+  const nameAlreadyUsed = editedName !== siteconf.name && existingNames.includes(editedName);
 
-  const validateSiteName = useCallback((newName: string) => {
-    let errorText = "";
-    let disabled = false;
-
-    if (localsites && localsites.includes(newName)) {
-      errorText = "Name is already used.";
-      disabled = true;
-    }
-
-    setExecButtonsDisabled(disabled);
-    setErrorTextSiteName(errorText);
-  }, [localsites]);
+  const editedSiteConf = { ...siteconf, name: editedName };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newName = e.target.value;
-    validateSiteName(newName);
-    setEditedName(newName);
+    setEditedName(e.target.value);
   };
 
   const saveSiteConf = async () => {
-    if (!editedSiteConf.key) {
-      return;
-    }
+    if (!editedSiteConf.key || nameAlreadyUsed) return;
 
     setLoading(true);
     setError(null);
@@ -91,8 +66,8 @@ const RenameDialog = ({ open, siteconf, onSuccess, onClose }: RenameDialogProps)
               fullWidth
               value={editedName}
               onChange={handleNameChange}
-              error={errorTextSiteName !== ""}
-              helperText={errorTextSiteName}
+              error={nameAlreadyUsed}
+              helperText={nameAlreadyUsed ? "Name is already used." : ""}
               disabled={loading}
             />
           </Box>
@@ -107,7 +82,7 @@ const RenameDialog = ({ open, siteconf, onSuccess, onClose }: RenameDialogProps)
         <Button onClick={onClose} disabled={loading}>
           Cancel
         </Button>
-        <Button onClick={saveSiteConf} disabled={execButtonsDisabled || loading}>
+        <Button onClick={saveSiteConf} disabled={nameAlreadyUsed || loading}>
           {loading ? <CircularProgress size={20} /> : 'Save'}
         </Button>
       </DialogActions>
