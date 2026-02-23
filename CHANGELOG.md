@@ -1,6 +1,7 @@
 # Quiqr App CHANGELOG
 
 ## Next Release
+- fix: prevent unnecessary site library refetches on dialog open and ensure site list updates after create/import (#647)
 
 ## 0.22.1 (2026-02-20) 
 - restore: release packages for all platforms 🥳
