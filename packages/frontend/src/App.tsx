@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Routes, Route, useParams, useNavigate } from "react-router";
 import { ThemeProvider, StyledEngineProvider, Theme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import { useQuery } from '@tanstack/react-query';
 import Workspace from "./containers/WorkspaceMounted/Workspace";
 import DashboardRoute from "./containers/WorkspaceMounted/components/DashboardRoute";
 import CollectionRoute from "./containers/WorkspaceMounted/components/CollectionRoute";
@@ -19,6 +20,7 @@ import { DialogProvider } from "./contexts/DialogProvider";
 import { useDialog } from "./hooks/useDialog";
 import SyncRoutedWithContext from "./containers/WorkspaceMounted/components/SyncRoutedWithContext";
 import SiteConfRoutedWithContext from "./containers/WorkspaceMounted/components/SiteConfRoutedWithContext";
+import { prefsQueryOptions } from "./queries/options";
 
 const defaultApplicationRole = "contentEditor";
 
@@ -91,18 +93,14 @@ const MainLayoutWrapper = ({ theme, libraryView, onLibraryViewChange }: MainLayo
 // Inner component that has access to useDialog
 const AppContent = ({ theme }: { theme: Theme }) => {
   const { openDialog } = useDialog();
-  const [applicationRole, setApplicationRole] = useState(defaultApplicationRole);
-  const [libraryView, setLibraryView] = useState("cards");
   const [, setShowSplashAtStartup] = useState(true);
 
-  useEffect(() => {
-    // Set library view from prefs
-    service.api.readConfPrefKey("libraryView").then((view) => {
-      if (typeof view === "string") {
-        setLibraryView(view);
-      }
-    });
+  // Use React Query for preferences - automatically updates when preferences change
+  const { data: prefs } = useQuery(prefsQueryOptions.all());
+  const applicationRole = (prefs?.applicationRole as string | undefined) ?? defaultApplicationRole;
+  const libraryView = (prefs?.sitesListingView as string | undefined) ?? "cards";
 
+  useEffect(() => {
     // Open splash dialog at startup if needed
     service.api.readConfPrefKey("showSplashAtStartup").then((show) => {
       if (typeof show === "undefined") {
@@ -119,19 +117,11 @@ const AppContent = ({ theme }: { theme: Theme }) => {
         });
       }
     });
-
-    // Set application role
-    service.api.readConfPrefKey("applicationRole").then((role) => {
-      if (!role) role = defaultApplicationRole;
-      if (typeof role === "string") {
-        setApplicationRole(role);
-      }
-    });
   }, [openDialog]);
 
   const handleLibraryViewChange = useCallback((view: string) => {
-    service.api.saveConfPrefKey("libraryView", view);
-    setLibraryView(view);
+    service.api.setUserPreference("sitesListingView", view);
+    // No need to update local state - React Query will handle it
   }, []);
 
   return (

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
@@ -22,7 +22,19 @@ import type { WebMenuDefinition, WebMenuItemDefinition } from '@quiqr/types';
  */
 const MenuBar = () => {
   const { isStandalone } = useEnvironment();
-  const { menuState, executeMenuAction } = useMenuState();
+  const { menuState, executeMenuAction, refresh } = useMenuState();
+
+  // Listen for menu state changes (e.g., when experimental features toggle)
+  useEffect(() => {
+    const handleMenuStateChanged = () => {
+      refresh();
+    };
+
+    window.addEventListener('menu-state-changed', handleMenuStateChanged);
+    return () => {
+      window.removeEventListener('menu-state-changed', handleMenuStateChanged);
+    };
+  }, [refresh]);
 
   // Don't render in packaged Electron mode
   if (!isStandalone) {

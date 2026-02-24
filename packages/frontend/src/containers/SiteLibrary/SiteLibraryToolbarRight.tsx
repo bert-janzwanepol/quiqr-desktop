@@ -1,19 +1,17 @@
 import { useNavigate } from "react-router";
 import { useInvalidateConfigurations } from "../../queries/hooks";
-import { ToolbarButton, ToolbarToggleButtonGroup } from "../TopToolbarRight";
+import { ToolbarButton } from "../TopToolbarRight";
 import AppsIcon from "@mui/icons-material/Apps";
 import SettingsApplicationsIcon from "@mui/icons-material/SettingsApplications";
 import InputIcon from "@mui/icons-material/Input";
 import AddIcon from "@mui/icons-material/Add";
-import ViewListIcon from "@mui/icons-material/ViewList";
-import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
 import { useDialog } from "../../hooks/useDialog";
 import { useToolbarActiveStates } from "../../hooks/useToolbarActiveStates";
 
 interface SiteLibraryToolbarItemsProps {
-  activeLibraryView: string;
-  handleChange: (viewName: string) => void;
+  activeLibraryView?: string;
+  handleChange?: (viewName: string) => void;
 }
 
 /**
@@ -58,23 +56,8 @@ export const useSiteLibraryToolbarItems = ({
     />,
   ];
 
-  const centerItems = [
-    <ToolbarToggleButtonGroup
-      key='buttonViewGroup'
-      activeOption={activeLibraryView}
-      handleChange={handleChange}
-      optionItems={[
-        {
-          icon: <ViewListIcon />,
-          value: "list",
-        },
-        {
-          icon: <ViewModuleIcon />,
-          value: "cards",
-        },
-      ]}
-    />,
-  ];
+  // Center items removed - view mode now controlled via Preferences > Appearance
+  const centerItems: JSX.Element[] = [];
 
   const rightItems = [
     <ToolbarButton

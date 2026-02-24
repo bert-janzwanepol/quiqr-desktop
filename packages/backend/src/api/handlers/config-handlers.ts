@@ -348,6 +348,12 @@ export function createGetInstanceSettingHandler(container: AppContainer) {
 export function createUpdateInstanceSettingsHandler(container: AppContainer) {
   return async ({ settings }: { settings: Record<string, unknown> }) => {
     await container.unifiedConfig.updateInstanceSettings(settings);
+
+    // Rebuild menu if experimental features setting changed
+    if ('experimentalFeatures' in settings) {
+      container.adapters.menu.createMainMenu();
+    }
+
     return true;
   };
 }

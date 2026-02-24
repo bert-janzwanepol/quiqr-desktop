@@ -32,6 +32,8 @@ function PrefsGeneral() {
       if (variables.prefKey === 'interfaceStyle') {
         const themeName = variables.prefValue === 'quiqr10-dark' ? 'Dark' : 'Light';
         addSnackMessage(`Interface style changed to ${themeName}`, { severity: 'success' });
+      } else if (variables.prefKey === 'sitesListingView') {
+        addSnackMessage('Site library view updated', { severity: 'success' });
       } else if (variables.prefKey === 'customOpenCommand') {
         if (variables.prefValue) {
           addSnackMessage('Custom open command saved', { severity: 'success' });
@@ -43,6 +45,8 @@ function PrefsGeneral() {
     onError: (error: Error, variables) => {
       if (variables.prefKey === 'interfaceStyle') {
         addSnackMessage(`Failed to change interface style: ${error.message}`, { severity: 'error' });
+      } else if (variables.prefKey === 'sitesListingView') {
+        addSnackMessage(`Failed to update site library view: ${error.message}`, { severity: 'error' });
       } else if (variables.prefKey === 'customOpenCommand') {
         addSnackMessage(`Failed to save custom open command: ${error.message}`, { severity: 'error' });
       }
@@ -50,6 +54,7 @@ function PrefsGeneral() {
   });
 
   const interfaceStyle = prefs?.interfaceStyle ?? 'quiqr10-light';
+  const sitesListingView = (prefs?.sitesListingView as string | undefined) ?? 'cards';
   const customOpenCommand = (prefs?.customOpenCommand as string | undefined) ?? '';
 
   // Local state for custom open command input
@@ -62,6 +67,15 @@ function PrefsGeneral() {
     savePrefMutation.mutate({ prefKey: 'interfaceStyle', prefValue: value });
   };
 
+  const handleSitesListingViewChange = (value: string) => {
+    savePrefMutation.mutate({ prefKey: 'sitesListingView', prefValue: value }, {
+      onSuccess: () => {
+        const viewName = value === 'cards' ? 'card view' : 'list view';
+        addSnackMessage(`Site library switched to ${viewName}`, { severity: 'success' });
+      }
+    });
+  };
+
   const handleSaveCustomCommand = () => {
     const trimmedCommand = (customCommandInput as string).trim();
     savePrefMutation.mutate({
@@ -72,7 +86,7 @@ function PrefsGeneral() {
 
   return (
     <Box sx={{ padding: '20px', height: '100%' }}>
-      <Typography variant="h4">General Preferences</Typography>
+      <Typography variant="h4">Appearance</Typography>
 
       <Box my={2}>
         <FormControl variant="outlined" sx={{ m: 1, minWidth: 300 }}>
@@ -91,6 +105,24 @@ function PrefsGeneral() {
             </MenuItem>
           </Select>
         </FormControl>
+      </Box>
+
+      <Box my={2}>
+        <FormControl variant="outlined" sx={{ m: 1, minWidth: 300 }}>
+          <InputLabel>Site Library View</InputLabel>
+          <Select
+            value={sitesListingView}
+            onChange={(e) => handleSitesListingViewChange(e.target.value)}
+            label="Site Library View"
+            sx={{ minWidth: 300 }}
+          >
+            <MenuItem value="cards">Card View</MenuItem>
+            <MenuItem value="list">List View</MenuItem>
+          </Select>
+        </FormControl>
+        <Typography variant="caption" color="text.secondary" sx={{ ml: 1, display: 'block' }}>
+          Controls how sites are displayed in the Site Library (cards or list).
+        </Typography>
       </Box>
 
       <Box my={2} mx={1}>

@@ -26,6 +26,19 @@ describe('WebMenuAdapter', () => {
         hugoServeDraftMode: false,
         devDisableAutoHugoServe: false,
       },
+      unifiedConfig: {
+        getInstanceSetting: vi.fn((path: string) => {
+          if (path === 'experimentalFeatures') return false;
+          if (path === 'dev.disablePartialCache') return false;
+          if (path === 'hugo.serveDraftMode') return false;
+          if (path === 'hugo.disableAutoHugoServe') return false;
+          return undefined;
+        }),
+        getEffectivePreference: vi.fn((key: string) => {
+          if (key === 'applicationRole') return 'contentEditor';
+          return undefined;
+        }),
+      },
       state: {
         currentSiteKey: 'test-site',
       },
@@ -59,14 +72,13 @@ describe('WebMenuAdapter', () => {
       expect(fileMenu?.items.some(i => i.id === 'close-site')).toBe(true);
     });
 
-    it('should create Edit menu with role submenu', () => {
+    it('should create Edit menu', () => {
       adapter.setContainer(mockContainer);
       const state = adapter.getMenuState();
       const editMenu = state.menus.find(m => m.id === 'edit');
 
       expect(editMenu).toBeDefined();
-      const roleSubmenu = editMenu?.items.find(i => i.id === 'role');
-      expect(roleSubmenu?.type).toBe('submenu');
+      // Role menu items removed - now available in Preferences > Behaviour
     });
 
     it('should create Hugo menu', () => {
@@ -134,6 +146,19 @@ describe('WebMenuAdapter', () => {
           ...mockContainer.config,
           experimentalFeatures: true,
         },
+        unifiedConfig: {
+          getInstanceSetting: vi.fn((path: string) => {
+            if (path === 'experimentalFeatures') return true;
+            if (path === 'dev.disablePartialCache') return false;
+            if (path === 'hugo.serveDraftMode') return false;
+            if (path === 'hugo.disableAutoHugoServe') return false;
+            return undefined;
+          }),
+          getEffectivePreference: vi.fn((key: string) => {
+            if (key === 'applicationRole') return 'contentEditor';
+            return undefined;
+          }),
+        },
       };
       adapter.setContainer(containerWithExp as any);
       const state = adapter.getMenuState();
@@ -145,29 +170,11 @@ describe('WebMenuAdapter', () => {
     });
   });
 
-  describe('role checkbox state', () => {
-    it('should check Content Editor when role is contentEditor', () => {
-      mockContainer.config.prefs.applicationRole = 'contentEditor';
-      adapter.setContainer(mockContainer);
-      const state = adapter.getMenuState();
-
-      const editMenu = state.menus.find(m => m.id === 'edit');
-      const roleSubmenu = editMenu?.items.find(i => i.id === 'role');
-      const contentEditor = roleSubmenu?.submenu?.find(i => i.id === 'role-content-editor');
-
-      expect(contentEditor?.checked).toBe(true);
-    });
-
-    it('should check Site Developer when role is siteDeveloper', () => {
-      mockContainer.config.prefs.applicationRole = 'siteDeveloper';
-      adapter.setContainer(mockContainer);
-      const state = adapter.getMenuState();
-
-      const editMenu = state.menus.find(m => m.id === 'edit');
-      const roleSubmenu = editMenu?.items.find(i => i.id === 'role');
-      const siteDeveloper = roleSubmenu?.submenu?.find(i => i.id === 'role-site-developer');
-
-      expect(siteDeveloper?.checked).toBe(true);
+  // Role menu items removed - now available in Preferences > Behaviour
+  // Tests kept for historical reference but skipped
+  describe.skip('role checkbox state (REMOVED)', () => {
+    it('role menu items have been moved to Preferences > Behaviour', () => {
+      // Role setting is now controlled via Preferences UI, not menu items
     });
   });
 
@@ -207,14 +214,32 @@ describe('WebMenuAdapter', () => {
     });
 
     it('should find items in submenus', () => {
-      adapter.setMenuItemEnabled('role-content-editor', false);
+      // Use experimental submenu instead since role menu was removed
+      const containerWithExp = {
+        ...mockContainer,
+        unifiedConfig: {
+          getInstanceSetting: vi.fn((path: string) => {
+            if (path === 'experimentalFeatures') return true;
+            if (path === 'dev.disablePartialCache') return false;
+            if (path === 'hugo.serveDraftMode') return false;
+            if (path === 'hugo.disableAutoHugoServe') return false;
+            return undefined;
+          }),
+          getEffectivePreference: vi.fn((key: string) => {
+            if (key === 'applicationRole') return 'contentEditor';
+            return undefined;
+          }),
+        },
+      };
+      adapter.setContainer(containerWithExp as any);
+      adapter.setMenuItemEnabled('disable-partials-cache', false);
       const state = adapter.getMenuState();
 
       const editMenu = state.menus.find(m => m.id === 'edit');
-      const roleSubmenu = editMenu?.items.find(i => i.id === 'role');
-      const contentEditor = roleSubmenu?.submenu?.find(i => i.id === 'role-content-editor');
+      const expSubmenu = editMenu?.items.find(i => i.id === 'experimental-submenu');
+      const cacheItem = expSubmenu?.submenu?.find(i => i.id === 'disable-partials-cache');
 
-      expect(contentEditor?.enabled).toBe(false);
+      expect(cacheItem?.enabled).toBe(false);
     });
 
     it('should handle non-existent menu item gracefully', () => {
@@ -442,6 +467,19 @@ describe('createWebAdapters', () => {
         hugoServeDraftMode: false,
         devDisableAutoHugoServe: false,
       },
+      unifiedConfig: {
+        getInstanceSetting: vi.fn((path: string) => {
+          if (path === 'experimentalFeatures') return false;
+          if (path === 'dev.disablePartialCache') return false;
+          if (path === 'hugo.serveDraftMode') return false;
+          if (path === 'hugo.disableAutoHugoServe') return false;
+          return undefined;
+        }),
+        getEffectivePreference: vi.fn((key: string) => {
+          if (key === 'applicationRole') return 'contentEditor';
+          return undefined;
+        }),
+      },
       state: {
         currentSiteKey: null
       }
@@ -466,6 +504,19 @@ describe('createWebAdapters', () => {
         hugoServeDraftMode: false,
         devDisableAutoHugoServe: false,
       },
+      unifiedConfig: {
+        getInstanceSetting: vi.fn((path: string) => {
+          if (path === 'experimentalFeatures') return false;
+          if (path === 'dev.disablePartialCache') return false;
+          if (path === 'hugo.serveDraftMode') return false;
+          if (path === 'hugo.disableAutoHugoServe') return false;
+          return undefined;
+        }),
+        getEffectivePreference: vi.fn((key: string) => {
+          if (key === 'applicationRole') return 'contentEditor';
+          return undefined;
+        }),
+      },
       state: {
         currentSiteKey: null
       }
@@ -487,6 +538,19 @@ describe('createWebAdapters', () => {
         disablePartialCache: false,
         hugoServeDraftMode: false,
         devDisableAutoHugoServe: false,
+      },
+      unifiedConfig: {
+        getInstanceSetting: vi.fn((path: string) => {
+          if (path === 'experimentalFeatures') return false;
+          if (path === 'dev.disablePartialCache') return false;
+          if (path === 'hugo.serveDraftMode') return false;
+          if (path === 'hugo.disableAutoHugoServe') return false;
+          return undefined;
+        }),
+        getEffectivePreference: vi.fn((key: string) => {
+          if (key === 'applicationRole') return 'contentEditor';
+          return undefined;
+        }),
       },
       state: {
         currentSiteKey: null

@@ -86,6 +86,8 @@ export function createExecuteMenuActionHandler(container: AppContainer) {
             return { type: 'success', refresh: true };
           }
 
+        // Hugo settings menu actions - DEPRECATED (settings moved to Application Settings > Hugo)
+        // Kept for backwards compatibility but no longer used by menu items
         case 'toggleDraftMode':
           {
             const currentValue = container.unifiedConfig.getInstanceSetting('hugo.serveDraftMode') as boolean;

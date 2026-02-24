@@ -56,7 +56,7 @@ describe('PrefsGeneral', () => {
       renderWithThemeContext();
 
       await waitFor(() => {
-        expect(screen.getByText('General Preferences')).toBeInTheDocument();
+        expect(screen.getByText('Appearance')).toBeInTheDocument();
       });
 
       // Verify dataFolder field is NOT present
@@ -78,7 +78,7 @@ describe('PrefsGeneral', () => {
       renderWithThemeContext();
 
       await waitFor(() => {
-        expect(screen.getByText(/General Preferences/i)).toBeInTheDocument();
+        expect(screen.getByText('Appearance')).toBeInTheDocument();
       });
 
       // Verify the select field exists (MUI creates complex DOM, so just check it renders)

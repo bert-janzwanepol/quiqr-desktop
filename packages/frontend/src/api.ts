@@ -729,6 +729,26 @@ export function updateInstanceSettings(settings: Partial<InstanceSettings>): Pro
 }
 
 /**
+ * Set a specific instance setting by path (convenience wrapper)
+ * Converts dot-notation path to nested object for updateInstanceSettings
+ */
+export function setInstanceSetting(path: string, value: unknown): Promise<boolean> {
+  // Convert dot notation path to nested object
+  // e.g., 'hugo.serveDraftMode' -> { hugo: { serveDraftMode: value } }
+  const pathParts = path.split('.');
+  const settings: Record<string, unknown> = {};
+  let current: Record<string, unknown> = settings;
+
+  for (let i = 0; i < pathParts.length - 1; i++) {
+    current[pathParts[i]] = {};
+    current = current[pathParts[i]] as Record<string, unknown>;
+  }
+  current[pathParts[pathParts.length - 1]] = value;
+
+  return updateInstanceSettings(settings as Partial<InstanceSettings>);
+}
+
+/**
  * Get site-specific settings
  */
 export function getSiteSettings(siteKey: string): Promise<SiteSettings> {

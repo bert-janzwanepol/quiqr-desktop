@@ -860,6 +860,29 @@ export const bundleMutationOptions = {
 };
 
 /**
+ * Instance settings queries (unified config API)
+ */
+export const instanceSettingsQueryOptions = {
+  /**
+   * Get all instance settings
+   */
+  all: () => ({
+    queryKey: ['getInstanceSettings'] as const,
+    queryFn: () => api.getInstanceSettings(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  }),
+
+  /**
+   * Get a specific instance setting by path
+   */
+  get: (path: string) => ({
+    queryKey: ['getInstanceSetting', path] as const,
+    queryFn: () => api.getInstanceSetting(path),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  }),
+};
+
+/**
  * User preferences mutations (unified config API)
  */
 export const prefsMutationOptions = {
@@ -929,6 +952,53 @@ export const prefsMutationOptions = {
       });
       queryClient.invalidateQueries({
         queryKey: ['readConfKey', 'prefs'],
+      });
+    },
+  }),
+};
+
+/**
+ * Instance settings mutations (unified config API)
+ */
+export const instanceSettingsMutationOptions = {
+  /**
+   * Update instance settings (partial update)
+   */
+  update: (queryClient: QueryClient) => ({
+    mutationFn: (params: { settings: Partial<import('../../types').InstanceSettings> }) =>
+      api.updateInstanceSettings(params.settings),
+
+    onSuccess: () => {
+      // Invalidate all instance settings queries
+      queryClient.invalidateQueries({
+        queryKey: ['getInstanceSettings'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['getInstanceSetting'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['getAllPropertyMetadata'],
+      });
+    },
+  }),
+
+  /**
+   * Set a single instance setting by path (convenience wrapper)
+   */
+  set: (queryClient: QueryClient) => ({
+    mutationFn: (params: { path: string; value: unknown }) =>
+      api.setInstanceSetting(params.path, params.value),
+
+    onSuccess: (_data: unknown, variables: { path: string }) => {
+      // Invalidate instance settings queries
+      queryClient.invalidateQueries({
+        queryKey: ['getInstanceSettings'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['getInstanceSetting', variables.path],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['getAllPropertyMetadata'],
       });
     },
   }),
