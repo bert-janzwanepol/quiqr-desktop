@@ -4,27 +4,32 @@
  * Handles reading/writing application configuration and user preferences.
  */
 
+import { spawn } from 'child_process';
 import type { AppContainer } from '../../config/container.js';
 
 /**
  * Read a configuration key from the global config
+ * LEGACY: Uses UnifiedConfigService instead of AppConfig
  */
 export function createReadConfKeyHandler(container: AppContainer) {
   return async ({ confkey }: { confkey: string }) => {
-    // Map config keys to their values
+    // Map config keys to their values from UnifiedConfigService
     const configMap: Record<string, unknown> = {
-      sitesListingView: container.config.sitesListingView,
-      lastOpenedSite: container.config.lastOpenedSite,
-      prefs: container.config.prefs,
-      lastOpenedPublishTargetForSite: container.config.lastOpenedPublishTargetForSite,
-      skipWelcomeScreen: container.config.skipWelcomeScreen,
-      experimentalFeatures: container.config.experimentalFeatures,
-      disablePartialCache: container.config.disablePartialCache,
-      devLocalApi: container.config.devLocalApi,
-      devDisableAutoHugoServe: container.config.devDisableAutoHugoServe,
-      hugoServeDraftMode: container.config.hugoServeDraftMode,
-      devShowCurrentUser: container.config.devShowCurrentUser,
-      currentUsername: container.config.currentUsername,
+      sitesListingView: container.unifiedConfig.getUserState('sitesListingView'),
+      lastOpenedSite: container.unifiedConfig.getUserState('lastOpenedSite'),
+      prefs: {
+        interfaceStyle: container.unifiedConfig.getEffectivePreference('interfaceStyle'),
+        dataFolder: container.unifiedConfig.getInstanceSetting('storage.dataFolder'),
+      },
+      lastOpenedPublishTargetForSite: container.unifiedConfig.getUserState('lastOpenedPublishTargetForSite'),
+      skipWelcomeScreen: container.unifiedConfig.getUserState('skipWelcomeScreen'),
+      experimentalFeatures: container.unifiedConfig.getInstanceSetting('experimentalFeatures'),
+      disablePartialCache: container.unifiedConfig.getInstanceSetting('dev.disablePartialCache'),
+      devLocalApi: container.unifiedConfig.getInstanceSetting('dev.localApi'),
+      devDisableAutoHugoServe: container.unifiedConfig.getInstanceSetting('hugo.disableAutoHugoServe'),
+      hugoServeDraftMode: container.unifiedConfig.getInstanceSetting('hugo.serveDraftMode'),
+      devShowCurrentUser: container.unifiedConfig.getInstanceSetting('dev.showCurrentUser'),
+      currentUsername: null, // Not stored in unified config
     };
 
     return configMap[confkey];
@@ -33,15 +38,21 @@ export function createReadConfKeyHandler(container: AppContainer) {
 
 /**
  * Read a preference key from user preferences
+ * LEGACY: Uses UnifiedConfigService instead of AppConfig
  */
 export function createReadConfPrefKeyHandler(container: AppContainer) {
   return async ({ confkey }: { confkey: string }) => {
-    return container.config.prefs[confkey as keyof typeof container.config.prefs];
+    // Handle special cases
+    if (confkey === 'dataFolder') {
+      return container.unifiedConfig.getInstanceSetting('storage.dataFolder');
+    }
+    return container.unifiedConfig.getEffectivePreference(confkey);
   };
 }
 
 /**
  * Save a preference key to user preferences
+ * LEGACY: Uses UnifiedConfigService instead of AppConfig
  */
 export function createSaveConfPrefKeyHandler(container: AppContainer) {
   return async ({
@@ -51,18 +62,26 @@ export function createSaveConfPrefKeyHandler(container: AppContainer) {
     prefKey: string;
     prefValue: string | boolean;
   }) => {
-    container.config.setPrefKey(prefKey, prefValue);
-    container.config.saveSync();
+    // Handle special cases - dataFolder is an instance setting
+    if (prefKey === 'dataFolder') {
+      await container.unifiedConfig.updateInstanceSettings({
+        storage: { dataFolder: prefValue as string },
+      });
+    } else {
+      await container.unifiedConfig.setUserPreference(prefKey, prefValue);
+    }
     return true;
   };
 }
 
 /**
  * Check if a role matches the application role preference
+ * LEGACY: Uses UnifiedConfigService instead of AppConfig
  */
 export function createMatchRoleHandler(container: AppContainer) {
   return async ({ role }: { role: string }) => {
-    return role === container.config.prefs.applicationRole;
+    const applicationRole = container.unifiedConfig.getEffectivePreference('applicationRole');
+    return role === applicationRole;
   };
 }
 
@@ -148,11 +167,13 @@ export function createShouldReloadFormHandler(container: AppContainer) {
 
 /**
  * Toggle experimental features
+ * Uses UnifiedConfigService for instance settings
  */
 export function createToggleExperimentalFeaturesHandler(container: AppContainer) {
   return async ({ enabled }: { enabled: boolean }) => {
-    container.config.setExperimentalFeatures(enabled);
-    await container.config.save();
+    await container.unifiedConfig.updateInstanceSettings({
+      experimentalFeatures: enabled,
+    });
 
     // Rebuild menu with new state
     container.adapters.menu.createMainMenu();
@@ -163,11 +184,13 @@ export function createToggleExperimentalFeaturesHandler(container: AppContainer)
 
 /**
  * Toggle partial cache
+ * Uses UnifiedConfigService for instance settings
  */
 export function createTogglePartialCacheHandler(container: AppContainer) {
   return async ({ enabled }: { enabled: boolean }) => {
-    container.config.setDisablePartialCache(enabled);
-    await container.config.save();
+    await container.unifiedConfig.updateInstanceSettings({
+      dev: { disablePartialCache: enabled },
+    });
 
     // Rebuild menu with new state
     container.adapters.menu.createMainMenu();
@@ -178,11 +201,13 @@ export function createTogglePartialCacheHandler(container: AppContainer) {
 
 /**
  * Toggle Hugo serve draft mode
+ * Uses UnifiedConfigService for instance settings
  */
 export function createToggleDraftModeHandler(container: AppContainer) {
   return async ({ enabled }: { enabled: boolean }) => {
-    container.config.setHugoServeDraftMode(enabled);
-    await container.config.save();
+    await container.unifiedConfig.updateInstanceSettings({
+      hugo: { serveDraftMode: enabled },
+    });
 
     // Rebuild menu with new state
     container.adapters.menu.createMainMenu();
@@ -193,11 +218,13 @@ export function createToggleDraftModeHandler(container: AppContainer) {
 
 /**
  * Toggle auto Hugo serve
+ * Uses UnifiedConfigService for instance settings
  */
 export function createToggleAutoHugoServeHandler(container: AppContainer) {
   return async ({ enabled }: { enabled: boolean }) => {
-    container.config.setDevDisableAutoHugoServe(enabled);
-    await container.config.save();
+    await container.unifiedConfig.updateInstanceSettings({
+      hugo: { disableAutoHugoServe: enabled },
+    });
 
     // Rebuild menu with new state
     container.adapters.menu.createMainMenu();
@@ -208,11 +235,11 @@ export function createToggleAutoHugoServeHandler(container: AppContainer) {
 
 /**
  * Change application role
+ * Uses UnifiedConfigService for user preferences
  */
 export function createChangeApplicationRoleHandler(container: AppContainer) {
   return async ({ role }: { role: string }) => {
-    container.config.setPrefKey('applicationRole', role);
-    await container.config.save();
+    await container.unifiedConfig.setUserPreference('applicationRole', role);
 
     // Rebuild menu with new state
     container.adapters.menu.createMainMenu();
@@ -242,17 +269,16 @@ export function createGetEnvironmentInfoHandler(container: AppContainer) {
 // =============================================================================
 
 /**
- * Get a resolved preference value with layered resolution
- * Returns the effective value after applying all layers (app-default < instance-default < user < instance-forced)
+ * Get a resolved preference value with 2-layer resolution
+ * Returns the effective value after applying layers (app-default < user)
  */
 export function createGetEffectivePreferenceHandler(container: AppContainer) {
   return async ({ prefKey }: { prefKey: string }) => {
-    // Use resolvePreference to get full metadata including source and locked status
-    const resolved = container.unifiedConfig.resolvePreference(prefKey as keyof import('@quiqr/types').UserPreferences);
+    // Use resolvePreference to get full metadata including source
+    const resolved = container.unifiedConfig.resolvePreference(prefKey);
     return {
       value: resolved.value,
       source: resolved.source,
-      locked: resolved.locked,
       path: resolved.path,
     };
   };
@@ -269,7 +295,6 @@ export function createGetEffectivePreferencesHandler(container: AppContainer) {
 
 /**
  * Set a user preference value
- * Will fail if the preference is locked by instance-forced settings
  */
 export function createSetUserPreferenceHandler(container: AppContainer) {
   return async ({ prefKey, value }: { prefKey: string; value: unknown }) => {
@@ -285,15 +310,6 @@ export function createSetUserPreferencesHandler(container: AppContainer) {
   return async ({ preferences }: { preferences: Record<string, unknown> }) => {
     await container.unifiedConfig.setUserPreferences(preferences);
     return true;
-  };
-}
-
-/**
- * Check if a preference is locked by instance-forced settings
- */
-export function createIsPreferenceLockedHandler(container: AppContainer) {
-  return async ({ prefKey }: { prefKey: string }) => {
-    return container.unifiedConfig.isPreferenceLocked(prefKey);
   };
 }
 
@@ -321,8 +337,8 @@ export function createGetInstanceSettingsHandler(container: AppContainer) {
  */
 export function createGetInstanceSettingHandler(container: AppContainer) {
   return async ({ path }: { path: string }) => {
-    // Cast path to valid InstanceSettings key - frontend is responsible for valid paths
-    return container.unifiedConfig.getInstanceSetting(path as keyof import('@quiqr/types').InstanceSettings);
+    // Use dot notation path to get nested instance setting value
+    return container.unifiedConfig.getInstanceSetting(path);
   };
 }
 
@@ -399,6 +415,82 @@ export function createIsExperimentalFeaturesEnabledHandler(container: AppContain
 }
 
 /**
+ * Get the storage path from application configuration
+ * Uses UnifiedConfigService for instance settings
+ */
+export function createGetStoragePathHandler(container: AppContainer) {
+  return async () => {
+    return {
+      path: container.unifiedConfig.getInstanceSetting('storage.dataFolder'),
+    };
+  };
+}
+
+/**
+ * Set the storage path in application configuration
+ * Uses UnifiedConfigService for instance settings
+ */
+export function createSetStoragePathHandler(container: AppContainer) {
+  return async ({ path }: { path: string }) => {
+    await container.unifiedConfig.updateInstanceSettings({
+      storage: { dataFolder: path },
+    });
+    return true;
+  };
+}
+
+/**
+ * Execute custom open command for a site
+ * Runs user-configured command with site path and name substitution
+ */
+export function createExecuteCustomOpenCommandHandler(container: AppContainer) {
+  return async ({ siteKey, command }: { siteKey: string; command: string }) => {
+    // Get site configuration to extract path
+    const configurations = await container.configurationProvider.getConfigurations();
+    const site = configurations.sites.find((s) => s.key === siteKey);
+
+    if (!site || !site.source) {
+      throw new Error(`Site not found or has no source path: ${siteKey}`);
+    }
+
+    const sitePath = site.source.path;
+    const siteName = site.name || site.key;
+
+    // Substitute %site_path% and %site_name% placeholders in command
+    const expandedCommand = command
+      .replace(/%site_path%/g, sitePath)
+      .replace(/%site_name%/g, siteName);
+
+    // Parse command into executable and arguments
+    const parts = expandedCommand.split(' ').filter((p) => p.length > 0);
+    if (parts.length === 0) {
+      throw new Error('Command is empty');
+    }
+
+    const executable = parts[0];
+    const args = parts.slice(1);
+
+    // Execute command
+    return new Promise<boolean>((resolve, reject) => {
+      const childProcess = spawn(executable, args, {
+        detached: true,
+        stdio: 'ignore',
+      });
+
+      childProcess.on('error', (error: Error) => {
+        reject(new Error(`Failed to execute command: ${error.message}`));
+      });
+
+      childProcess.on('spawn', () => {
+        // Command spawned successfully
+        childProcess.unref(); // Allow parent to exit independently
+        resolve(true);
+      });
+    });
+  };
+}
+
+/**
  * Create all config-related handlers
  */
 export function createConfigHandlers(container: AppContainer) {
@@ -430,7 +522,6 @@ export function createConfigHandlers(container: AppContainer) {
     getEffectivePreferences: createGetEffectivePreferencesHandler(container),
     setUserPreference: createSetUserPreferenceHandler(container),
     setUserPreferences: createSetUserPreferencesHandler(container),
-    isPreferenceLocked: createIsPreferenceLockedHandler(container),
     getAllPropertyMetadata: createGetAllPropertyMetadataHandler(container),
     getInstanceSettings: createGetInstanceSettingsHandler(container),
     getInstanceSetting: createGetInstanceSettingHandler(container),
@@ -441,5 +532,12 @@ export function createConfigHandlers(container: AppContainer) {
     switchUser: createSwitchUserHandler(container),
     listUsers: createListUsersHandler(container),
     isExperimentalFeaturesEnabled: createIsExperimentalFeaturesEnabledHandler(container),
+
+    // Storage path handlers
+    getStoragePath: createGetStoragePathHandler(container),
+    setStoragePath: createSetStoragePathHandler(container),
+
+    // Custom open command handler
+    executeCustomOpenCommand: createExecuteCustomOpenCommandHandler(container),
   };
 }

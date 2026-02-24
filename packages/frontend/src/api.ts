@@ -603,6 +603,27 @@ export function getEnvironmentInfo() {
 }
 
 /**
+ * Get the storage path from application configuration
+ */
+export function getStoragePath() {
+  return request('getStoragePath', {});
+}
+
+/**
+ * Set the storage path in application configuration
+ */
+export function setStoragePath(path: string) {
+  return request('setStoragePath', { path });
+}
+
+/**
+ * Execute custom open command for a site
+ */
+export function executeCustomOpenCommand(siteKey: string, command: string): Promise<boolean> {
+  return request('executeCustomOpenCommand', { siteKey, command }) as Promise<boolean>;
+}
+
+/**
    * Get current menu state (for web mode)
    */
 export function getMenuState() {
@@ -680,13 +701,6 @@ export function setUserPreferences(preferences: Partial<UserPreferences>): Promi
 }
 
 /**
- * Check if a preference is locked (forced by instance admin)
- */
-export function isPreferenceLocked<K extends keyof UserPreferences>(prefKey: K): Promise<boolean> {
-  return request('isPreferenceLocked', { prefKey }) as Promise<boolean>;
-}
-
-/**
  * Get all property metadata for the about:config style inspection
  */
 export function getAllPropertyMetadata(): Promise<ConfigPropertyMetadata[]> {
@@ -703,8 +717,8 @@ export function getInstanceSettings(): Promise<InstanceSettings> {
 /**
  * Get a specific instance setting
  */
-export function getInstanceSetting<K extends keyof InstanceSettings>(key: K): Promise<InstanceSettings[K]> {
-  return request('getInstanceSetting', { key }) as Promise<InstanceSettings[K]>;
+export function getInstanceSetting(path: string): Promise<unknown> {
+  return request('getInstanceSetting', { path }) as Promise<unknown>;
 }
 
 /**

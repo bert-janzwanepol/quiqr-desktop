@@ -19,6 +19,18 @@ import { EnvOverrideLayer } from './env-override-layer.js';
 import { ConfigResolver, ResolvedValue } from './config-resolver.js';
 
 /**
+ * Type for partial updates to instance settings (deep partial for nested objects)
+ */
+export type DeepPartialInstanceSettings = {
+  storage?: Partial<InstanceSettings['storage']>;
+  git?: Partial<InstanceSettings['git']>;
+  logging?: Partial<InstanceSettings['logging']>;
+  experimentalFeatures?: boolean;
+  dev?: Partial<InstanceSettings['dev']>;
+  hugo?: Partial<InstanceSettings['hugo']>;
+};
+
+/**
  * Options for creating the UnifiedConfigService
  */
 export interface UnifiedConfigServiceOptions {
@@ -28,7 +40,7 @@ export interface UnifiedConfigServiceOptions {
   configDir?: string;
 
   /**
-   * Current user ID (defaults to 'default' for single-user mode)
+   * Current user ID (defaults to 'ELECTRON' for Electron single-user mode)
    */
   userId?: string;
 }
@@ -44,7 +56,7 @@ export class UnifiedConfigService {
 
   constructor(options: UnifiedConfigServiceOptions = {}) {
     const configDir = options.configDir || path.join(os.homedir(), '.config', 'quiqr');
-    const userId = options.userId || 'default';
+    const userId = options.userId || 'ELECTRON';
 
     this.store = new ConfigStore(configDir);
     this.envLayer = new EnvOverrideLayer();
@@ -59,7 +71,7 @@ export class UnifiedConfigService {
    * Initialize the service synchronously
    * Used for auto-initialization in constructor
    */
-  private initializeSync(userId: string = 'default'): void {
+  private initializeSync(userId: string = 'ELECTRON'): void {
     if (this.initialized) return;
 
     this.store.ensureConfigDirSync();
@@ -71,7 +83,7 @@ export class UnifiedConfigService {
   /**
    * Initialize the service (async version for re-initialization)
    */
-  async initialize(userId: string = 'default'): Promise<void> {
+  async initialize(userId: string = 'ELECTRON'): Promise<void> {
     if (this.initialized) return;
 
     await this.store.ensureConfigDir();
@@ -95,9 +107,9 @@ export class UnifiedConfigService {
 
   /**
    * Get the effective value of a user preference
-   * This resolves through all layers and returns the final value
+   * This resolves through 2 layers: user preferences → app defaults
    */
-  getEffectivePreference<K extends keyof UserPreferences>(key: K): UserPreferences[K] {
+  getEffectivePreference(key: string): unknown {
     this.ensureInitialized();
     return this.resolver.getEffectivePreference(key);
   }
@@ -105,7 +117,7 @@ export class UnifiedConfigService {
   /**
    * Get all effective preferences as a merged object
    */
-  getEffectivePreferences(): UserPreferences {
+  getEffectivePreferences(): Record<string, unknown> {
     this.ensureInitialized();
     return this.resolver.getEffectivePreferences();
   }
@@ -113,61 +125,24 @@ export class UnifiedConfigService {
   /**
    * Get a preference with full resolution metadata
    */
-  resolvePreference<K extends keyof UserPreferences>(key: K): ResolvedValue<UserPreferences[K]> {
+  resolvePreference(key: string): ResolvedValue<unknown> {
     this.ensureInitialized();
     return this.resolver.resolvePreference(key);
   }
 
   /**
-   * Check if a preference is locked by instance admin
+   * Set a user preference
    */
-  isPreferenceLocked<K extends keyof UserPreferences>(key: K): boolean {
+  async setUserPreference(key: string, value: unknown): Promise<void> {
     this.ensureInitialized();
-    return this.resolver.isPreferenceLocked(key);
-  }
-
-  /**
-   * Set a user preference (only works for non-locked preferences)
-   */
-  async setUserPreference<K extends keyof UserPreferences>(
-    key: K,
-    value: UserPreferences[K]
-  ): Promise<void> {
-    this.ensureInitialized();
-
-    if (this.resolver.isPreferenceLocked(key)) {
-      throw new Error(`Preference '${key}' is locked by instance administrator`);
-    }
-
-    const userConfig = this.resolver.getUserConfig();
-    if (!userConfig) {
-      throw new Error('User config not loaded');
-    }
-
-    const updatedConfig: UserConfig = {
-      ...userConfig,
-      preferences: {
-        ...userConfig.preferences,
-        [key]: value,
-      },
-    };
-
-    await this.store.writeUserConfig(updatedConfig, this.resolver.getUserId());
-    await this.resolver.reload();
+    await this.resolver.saveUserPreference(key, value);
   }
 
   /**
    * Set multiple user preferences at once
    */
-  async setUserPreferences(prefs: Partial<UserPreferences>): Promise<void> {
+  async setUserPreferences(prefs: Record<string, unknown>): Promise<void> {
     this.ensureInitialized();
-
-    // Check for locked preferences
-    for (const key of Object.keys(prefs) as (keyof UserPreferences)[]) {
-      if (this.resolver.isPreferenceLocked(key)) {
-        throw new Error(`Preference '${key}' is locked by instance administrator`);
-      }
-    }
 
     const userConfig = this.resolver.getUserConfig();
     if (!userConfig) {
@@ -283,6 +258,22 @@ export class UnifiedConfigService {
     await this.resolver.reload();
   }
 
+  /**
+   * Generic: Get a user state field (non-preference user data)
+   */
+  getUserState<K extends keyof UserConfig>(key: K): UserConfig[K] | undefined {
+    this.ensureInitialized();
+    return this.resolver.getUserState(key);
+  }
+
+  /**
+   * Generic: Set a user state field (non-preference user data)
+   */
+  async setUserState<K extends keyof UserConfig>(key: K, value: UserConfig[K]): Promise<void> {
+    this.ensureInitialized();
+    await this.resolver.saveUserState(key, value);
+  }
+
   // ============================================================
   // Instance Settings Methods
   // ============================================================
@@ -296,11 +287,11 @@ export class UnifiedConfigService {
   }
 
   /**
-   * Get an instance setting value
+   * Get an instance setting value by path (dot notation)
    */
-  getInstanceSetting<K extends keyof InstanceSettings>(key: K): InstanceSettings[K] | undefined {
+  getInstanceSetting(path: string): unknown {
     this.ensureInitialized();
-    return this.resolver.getInstanceSettings()?.[key];
+    return this.resolver.getEffectiveInstanceSetting(path);
   }
 
   /**
@@ -314,7 +305,7 @@ export class UnifiedConfigService {
   /**
    * Update instance settings (admin operation)
    */
-  async updateInstanceSettings(updates: Partial<InstanceSettings>): Promise<void> {
+  async updateInstanceSettings(updates: DeepPartialInstanceSettings): Promise<void> {
     this.ensureInitialized();
 
     const current = this.resolver.getInstanceSettings();
@@ -324,10 +315,18 @@ export class UnifiedConfigService {
 
     const updated: InstanceSettings = {
       ...current,
-      ...updates,
+      ...(updates.experimentalFeatures !== undefined ? { experimentalFeatures: updates.experimentalFeatures } : {}),
       storage: {
         ...current.storage,
         ...(updates.storage || {}),
+      },
+      git: {
+        ...current.git,
+        ...(updates.git || {}),
+      },
+      logging: {
+        ...current.logging,
+        ...(updates.logging || {}),
       },
       dev: {
         ...current.dev,
@@ -356,16 +355,20 @@ export class UnifiedConfigService {
   }
 
   /**
-   * Update settings for a site
+   * Update settings for a site (FUTURE - not currently used in simplified architecture)
    */
   async updateSiteSettings(siteKey: string, updates: Partial<SiteSettings['settings']>): Promise<void> {
     this.ensureInitialized();
 
     const current = await this.store.readSiteSettings(siteKey);
+    if (!current) {
+      throw new Error(`Site settings not found for: ${siteKey}`);
+    }
+
     const updated: SiteSettings = {
       ...current,
       settings: {
-        ...current.settings,
+        ...(current.settings || {}),
         ...updates,
       },
     };

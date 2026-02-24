@@ -137,7 +137,7 @@ export class HugoServer {
 
     const hugoArgs = ['server', '--bind','0.0.0.0', '--port', '13131', '--disableFastRender'];
 
-    if (this.appConfig.hugoServeDraftMode) {
+    if (this.container.unifiedConfig.getInstanceSetting('hugo.serveDraftMode')) {
       this.outputConsole.appendLine('Server Draft Mode Enabled...');
       this.container.logger.infoSite(
         this.siteKey,

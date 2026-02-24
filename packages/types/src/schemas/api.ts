@@ -22,7 +22,6 @@ import { fieldSchema } from './fields.js'
 export const resolvedPreferenceSchema = z.object({
   value: z.unknown(),
   source: configLayerSchema,
-  locked: z.boolean(),
   path: z.string()
 })
 
@@ -299,6 +298,15 @@ export const scaffoldResultSchema = z.object({
   error: z.string().optional()
 })
 
+// Storage path schemas
+export const setStoragePathRequestSchema = z.object({
+  path: z.string()
+})
+
+export const getStoragePathResponseSchema = z.object({
+  path: z.string()
+})
+
 // API Schemas mapping - maps API method names to their response schemas
 export const apiSchemas = {
   // Workspace operations
@@ -398,6 +406,8 @@ export const apiSchemas = {
   matchRole: z.boolean(),
   invalidateCache: z.boolean(),
   getEnvironmentInfo: environmentInfoSchema,
+  getStoragePath: getStoragePathResponseSchema,
+  setStoragePath: z.boolean(),
 
   // Hugo operations
   stopHugoServer: hugoServerResponseSchema,
@@ -450,7 +460,6 @@ export const apiSchemas = {
   getEffectivePreferences: userPreferencesSchema,
   setUserPreference: z.boolean(),
   setUserPreferences: z.boolean(),
-  isPreferenceLocked: z.boolean(),
   getAllPropertyMetadata: z.array(configPropertyMetadataSchema),
   getInstanceSettings: instanceSettingsSchema,
   getInstanceSetting: z.unknown(),
@@ -460,7 +469,8 @@ export const apiSchemas = {
   getCurrentUserId: z.string(),
   switchUser: z.boolean(),
   listUsers: z.array(z.string()),
-  isExperimentalFeaturesEnabled: z.boolean()
+  isExperimentalFeaturesEnabled: z.boolean(),
+  executeCustomOpenCommand: z.boolean()
 } as const
 
 // Type exports
@@ -490,6 +500,8 @@ export type EnvironmentInfo = z.infer<typeof environmentInfoSchema>
 export type UploadFileToBundlePathResponse = z.infer<typeof uploadFileToBundlePathResponseSchema>
 export type AiPromptResponse = z.infer<typeof aiPromptResponseSchema>
 export type FrontMatterContent = z.infer<typeof frontMatterContentSchema>
+export type SetStoragePathRequest = z.infer<typeof setStoragePathRequestSchema>
+export type GetStoragePathResponse = z.infer<typeof getStoragePathResponseSchema>
 
 // This type includes all the api method names
 export type ApiMethod = keyof typeof apiSchemas

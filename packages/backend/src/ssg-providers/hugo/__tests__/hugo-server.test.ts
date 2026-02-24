@@ -113,7 +113,11 @@ describe('HugoServer', () => {
     });
 
     it('includes --buildDrafts when draft mode is enabled', async () => {
-      (mockDeps.appConfig as any).hugoServeDraftMode = true;
+      // Update mock to return true for draft mode
+      vi.mocked(mockDeps.container!.unifiedConfig.getInstanceSetting).mockImplementation((path: string) => {
+        if (path === 'hugo.serveDraftMode') return true;
+        return false;
+      });
 
       const server = new HugoServer(
         { workspacePath: '/test', hugover: '0.120.0' },

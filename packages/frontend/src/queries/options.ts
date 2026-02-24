@@ -286,20 +286,11 @@ export const prefsQueryOptions = {
   }),
 
   /**
-   * Get a single preference with full metadata (value, source, locked status)
+   * Get a single preference with full metadata (value, source, path)
    */
   withMetadata: <K extends keyof import('../../types').UserPreferences>(prefKey: K) => ({
     queryKey: ['getEffectivePreference', prefKey] as const,
     queryFn: () => api.getEffectivePreference(prefKey),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  }),
-
-  /**
-   * Check if a preference is locked (forced by instance settings)
-   */
-  isLocked: <K extends keyof import('../../types').UserPreferences>(prefKey: K) => ({
-    queryKey: ['isPreferenceLocked', prefKey] as const,
-    queryFn: () => api.isPreferenceLocked(prefKey),
     staleTime: 5 * 60 * 1000, // 5 minutes
   }),
 

@@ -74,9 +74,12 @@ export function createGetWorkspaceDetailsHandler(container: AppContainer) {
     // Update state - delegates to AppState
     container.state.setCurrentSite(siteKey, workspaceKey, workspacePath);
 
-    // Save last opened - delegates to AppConfig
-    container.config.setLastOpenedSite(siteKey, workspaceKey, workspacePath);
-    await container.config.save();
+    // Save last opened - delegates to UnifiedConfigService
+    await container.unifiedConfig.setUserState('lastOpenedSite', {
+      siteKey,
+      workspaceKey,
+      sitePath: workspacePath,
+    });
 
     // Update menu to reflect that a site is now selected
     container.adapters.menu.createMainMenu();
@@ -119,8 +122,11 @@ export function createMountWorkspaceHandler(container: AppContainer) {
     container.state.currentSitePath = workspaceHead?.path || '';
 
     // Save last opened site to config
-    container.config.setLastOpenedSite(siteKey, workspaceKey, workspaceHead?.path || null);
-    await container.config.save();
+    await container.unifiedConfig.setUserState('lastOpenedSite', {
+      siteKey,
+      workspaceKey,
+      sitePath: workspaceHead?.path || null,
+    });
 
     // Update menu to reflect that a site is now selected
     container.adapters.menu.createMainMenu();

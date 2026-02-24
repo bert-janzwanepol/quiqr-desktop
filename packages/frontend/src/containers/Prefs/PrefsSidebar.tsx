@@ -9,7 +9,7 @@ interface PrefsSidebarProps {
 }
 
 export const PrefsSidebar = (props: PrefsSidebarProps) => {
-  const menu = {
+  const preferencesMenu = {
     title: 'Preferences',
     items: [
       {
@@ -18,14 +18,32 @@ export const PrefsSidebar = (props: PrefsSidebarProps) => {
         to: '/prefs/general',
         exact: true,
       },
+    ],
+  };
+
+  const applicationSettingsMenu = {
+    title: 'Application Settings',
+    items: [
       {
         active: true,
-        label: 'Advanced',
-        to: '/prefs/advanced',
+        label: 'Storage',
+        to: '/prefs/storage',
+        exact: true,
+      },
+      {
+        active: true,
+        label: 'Git',
+        to: '/prefs/git',
+        exact: true,
+      },
+      {
+        active: true,
+        label: 'Logging',
+        to: '/prefs/logging',
         exact: true,
       },
     ],
   };
 
-  return <Sidebar {...props} menus={[menu]} />;
+  return <Sidebar {...props} menus={[preferencesMenu, applicationSettingsMenu]} />;
 };

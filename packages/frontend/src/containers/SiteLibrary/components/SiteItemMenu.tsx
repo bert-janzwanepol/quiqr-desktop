@@ -3,8 +3,12 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { useQuery } from '@tanstack/react-query';
 import { SiteConfig } from '../../../../types';
 import { openExternal } from '../../../utils/platform';
+import { executeCustomOpenCommand } from '../../../api';
+import { prefsQueryOptions } from '../../../queries/options';
+import { useSnackbar } from '../../../contexts/SnackbarContext';
 
 interface SiteItemMenuProps {
   site: SiteConfig;
@@ -13,6 +17,11 @@ interface SiteItemMenuProps {
 
 const SiteItemMenu = ({ site, onMenuAction } : SiteItemMenuProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const { addSnackMessage } = useSnackbar();
+
+  // Query for custom open command preference
+  const { data: prefs } = useQuery(prefsQueryOptions.all());
+  const customOpenCommand = prefs?.customOpenCommand;
 
   const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -26,6 +35,18 @@ const SiteItemMenu = ({ site, onMenuAction } : SiteItemMenuProps) => {
     handleClose();
     onMenuAction(action, site);
   }, [handleClose, onMenuAction, site]);
+
+  const handleOpenInCustom = useCallback(async () => {
+    handleClose();
+    if (!customOpenCommand) return;
+
+    try {
+      await executeCustomOpenCommand(site.key, customOpenCommand);
+      addSnackMessage(`Opened site in ${customOpenCommand.split(' ')[0]}`, { severity: 'success' });
+    } catch (error) {
+      addSnackMessage(`Failed to open site: ${(error as Error).message}`, { severity: 'error' });
+    }
+  }, [customOpenCommand, site.key, addSnackMessage, handleClose]);
 
   const menuButton = (
     <IconButton
@@ -63,6 +84,12 @@ const SiteItemMenu = ({ site, onMenuAction } : SiteItemMenuProps) => {
       open={Boolean(anchorEl)}
       keepMounted
       onClose={handleClose}>
+      {customOpenCommand && (
+        <MenuItem key='openInCustom' onClick={handleOpenInCustom}>
+          Open In...
+        </MenuItem>
+      )}
+
       <MenuItem key='rename' onClick={() => handleAction('rename')}>
         Rename
       </MenuItem>

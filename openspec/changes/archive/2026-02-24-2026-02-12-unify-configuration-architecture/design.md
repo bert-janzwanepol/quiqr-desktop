@@ -8,73 +8,82 @@ This document captures architectural decisions for the unified configuration sys
 
 ## Architecture Decisions
 
-### ADR-1: Configuration Tree Structure
+### ADR-1: Simplified Configuration Structure
 
-**Context:** Need a hierarchical structure that can represent instance-level settings, group preferences, user preferences, and site settings.
+**Context:** Need a simple, clear separation between instance-level settings and user preferences.
 
-**Decision:** Use a tree-based entity/property structure with dot-notation paths:
+**Decision:** Use a two-file structure with clear boundaries:
 
+**`instance_settings.json`** - Instance-level configuration:
 ```
-instance.settings.storage.type          # "fs" | "s3"
-instance.settings.storage.dataFolder    # "~/Quiqr"
-instance.settings.user_default_preferences.interfaceStyle  # default for new users
-instance.settings.user_forced_preferences.logRetentionDays # cannot be overridden
-instance.groups[groupId].preferences.interfaceStyle
-instance.users[userId].preferences.interfaceStyle
-instance.sites[siteKey].settings.hugoVersion
+{
+  "storage": { "type": "fs", "dataFolder": "/home/user/QuiqrData" },
+  "logging": { "logRetentionDays": 30, "logLevel": "info" },
+  "experimentalFeatures": false,
+  "dev": { "localApi": false, "showCurrentUser": false, "disablePartialCache": false },
+  "hugo": { "serveDraftMode": false, "disableAutoHugoServe": false }
+}
 ```
 
-**Consequences:**
-- Firefox-style "about:config" inspection becomes possible
-- Paths can be environment-variable mapped: `QUIQR_STORAGE_DATAFOLDER` → `instance.settings.storage.dataFolder`
-- Clear ownership and precedence at each level
-
-### ADR-2: Layered Configuration Precedence
-
-**Context:** Different deployment scenarios require different precedence rules.
-
-**Decision:** Implement 5 configuration layers with merge semantics:
-
-| Layer | Priority | Override-able | Source |
-|-------|----------|---------------|--------|
-| App Defaults | 1 (lowest) | Yes | Hardcoded |
-| Instance Defaults | 2 | Yes | `instance_settings.json` |
-| Group Preferences | 3 | Yes | `instance_settings.json` |
-| User Preferences | 4 | Yes | `user_prefs_[user].json` |
-| Instance Forced | 5 (highest) | No | `instance_settings.json` |
-
-**Resolution Algorithm:**
-```typescript
-function resolvePreference(key: string, userId: string, groupId?: string): unknown {
-  // Check forced preferences first (cannot be overridden)
-  if (instanceConfig.settings.user_forced_preferences?.[key] !== undefined) {
-    return instanceConfig.settings.user_forced_preferences[key];
-  }
-  
-  // User preference overrides group/default
-  if (userConfig[userId]?.preferences?.[key] !== undefined) {
-    return userConfig[userId].preferences[key];
-  }
-  
-  // Group preference overrides instance default
-  if (groupId && instanceConfig.groups?.[groupId]?.preferences?.[key] !== undefined) {
-    return instanceConfig.groups[groupId].preferences[key];
-  }
-  
-  // Instance default overrides app default
-  if (instanceConfig.settings.user_default_preferences?.[key] !== undefined) {
-    return instanceConfig.settings.user_default_preferences[key];
-  }
-  
-  // App default
-  return APP_DEFAULTS[key];
+**`user_prefs_ELECTRON.json`** - User preferences (Electron single-user):
+```
+{
+  "userId": "ELECTRON",
+  "preferences": { "interfaceStyle": "quiqr10-dark" },
+  "lastOpenedSite": { "siteKey": null, "workspaceKey": null, "sitePath": null },
+  "lastOpenedPublishTargetForSite": {},
+  "skipWelcomeScreen": false,
+  "sitesListingView": "all"
 }
 ```
 
 **Consequences:**
-- Admins can enforce policies via forced preferences
-- Users retain agency over non-forced settings
-- Group-level settings enable team configurations
+- Clear separation: instance settings vs user preferences
+- No forced/overridable complexity - just hardcoded defaults + user overrides
+- Groups and site-specific settings deferred to future changes
+- Electron edition uses `user_prefs_ELECTRON.json` for clarity
+
+### ADR-2: Simple Two-Layer Resolution
+
+**Context:** Complex layering adds unnecessary complexity for current needs.
+
+**Decision:** Implement simple 2-layer resolution:
+
+| Layer | Priority | Source |
+|-------|----------|--------|
+| App Defaults | 1 (lowest) | Hardcoded in source |
+| User Preferences | 2 (highest) | `user_prefs_[user].json` |
+
+**Resolution Algorithm:**
+```typescript
+function getUserPreference(key: string, userId: string): unknown {
+  // User preference overrides app default
+  const userConfig = loadUserConfig(userId);
+  if (userConfig.preferences?.[key] !== undefined) {
+    return userConfig.preferences[key];
+  }
+
+  // Fall back to app default
+  return APP_DEFAULTS.preferences[key];
+}
+
+function getInstanceSetting(path: string): unknown {
+  // Instance setting overrides app default
+  const instanceConfig = loadInstanceConfig();
+  const value = getNestedValue(instanceConfig, path);
+  if (value !== undefined) {
+    return value;
+  }
+
+  // Fall back to app default
+  return getNestedValue(APP_DEFAULTS.instance, path);
+}
+```
+
+**Consequences:**
+- Simple, predictable behavior
+- No forced/default/group complexity
+- Groups and forced preferences deferred to future multi-user changes
 
 ### ADR-3: File-Based Storage with Environment Override
 
@@ -86,9 +95,9 @@ function resolvePreference(key: string, userId: string, groupId?: string): unkno
 
 **Files:**
 ```
-instance_settings.json    # Instance-level config, defaults, forced prefs, groups
-user_prefs_[userId].json  # Per-user preferences (multi-user mode)
-site_settings_[key].json  # Per-site settings (optional, for large deployments)
+instance_settings.json      # Instance-level settings (storage, logging, dev, hugo)
+user_prefs_ELECTRON.json    # User preferences (Electron single-user edition)
+user_prefs_[userId].json    # User preferences (future multi-user mode)
 ```
 
 **Environment Variable Mapping:**
@@ -104,26 +113,27 @@ QUIQR_SECRETS_*              → age-encrypted secret refs
 - Docker/K8s deployments can inject config via env vars
 - File-based config enables version control of instance settings
 
-### ADR-4: Single-User Mode Compatibility
+### ADR-4: Electron Single-User Mode
 
-**Context:** Desktop users should not experience complexity from multi-user features.
+**Context:** Electron desktop edition is single-user by default.
 
-**Decision:** Implement transparent single-user mode where:
-- No explicit user ID required
-- `user_prefs_default.json` stores preferences
-- Group features disabled
-- All APIs work identically (userId defaults to "default")
+**Decision:** Use `user_prefs_ELECTRON.json` for Electron single-user edition:
+- Fixed userId: `"ELECTRON"`
+- File name clearly indicates it's the Electron edition
+- No multi-user complexity in Electron mode
+- All APIs use `"ELECTRON"` as default userId
 
-**Detection:**
+**Implementation:**
 ```typescript
-const isSingleUserMode = !instanceConfig.settings.multiUserEnabled;
-const effectiveUserId = isSingleUserMode ? 'default' : authenticatedUserId;
+// Electron edition always uses "ELECTRON" userId
+const DEFAULT_USER_ID = 'ELECTRON';
+const userConfigFile = `user_prefs_${DEFAULT_USER_ID}.json`;
 ```
 
 **Consequences:**
-- Zero behavior change for existing desktop users
-- Migration path preserves all current preferences
-- Same codebase supports both modes
+- Clear distinction between Electron (single-user) and future multi-user modes
+- File name self-documenting
+- No confusion with "default" terminology
 
 ### ADR-5: Zod Schema Organization
 
@@ -181,34 +191,28 @@ const userConfigSchema = z.object({
 - Runtime validation of config files
 - Self-documenting configuration structure
 
-### ADR-6: Migration Strategy
+### ADR-6: No Migration - Hardcoded Defaults
 
-**Context:** Existing users have preferences in `quiqr-app-config.json`.
+**Context:** Existing users have minimal settings in `quiqr-app-config.json`, and the current system has comprehensive hardcoded defaults.
 
-**Decision:** Implement automatic migration on first run with new version:
+**Decision:** Do not implement automatic migration. Instead:
 
-1. Detect old config format
-2. Extract user preferences → `user_prefs_default.json`
-3. Extract instance-level settings → `instance_settings.json`
-4. Preserve old file as backup: `quiqr-app-config.json.v1-backup`
-5. Write migration marker to prevent re-migration
+1. Rely on hardcoded defaults for all initial values
+2. Old config files are ignored (not read or migrated)
+3. Users start with fresh configuration using new structure
+4. All settings have sensible defaults, so no data loss
 
-**Mapping:**
-```
-OLD                           → NEW
-lastOpenedSite               → instance.users[key].lastOpenedSite
-prefs.*                      → user_prefs_default.preferences.*
-skipWelcomeScreen            → user_prefs_default.preferences.skipWelcomeScreen
-experimentalFeatures         → instance.settings.experimentalFeatures
-devLocalApi                  → instance.settings.dev.localApi
-hugoServeDraftMode           → instance.sites[key].hugo.serveDraftMode 
-lastOpenedPublishTargetForSite → instance.sites[key].lastPublishTarget
-```
+**Rationale:**
+- Current user base is small and settings are minimal
+- Hardcoded defaults already provide complete initial configuration
+- Migration complexity not justified by current usage
+- Clean break enables simpler implementation
 
 **Consequences:**
-- Zero data loss for existing users
-- Rollback possible via backup file
-- Clear mapping enables automated validation
+- Users will see default settings on first run with new version
+- No risk of migration bugs or edge cases
+- Simpler codebase without migration logic
+- Users can reconfigure their preferences (minimal effort given limited current settings)
 
 ## Component Interactions
 
