@@ -435,13 +435,13 @@ export type ReadConfKeyMap = z.infer<typeof appConfigSchema>
 // ============================================================================
 // Unified Configuration Architecture
 // ============================================================================
-// Implements hierarchical config with layered resolution:
-// App Defaults < Instance Defaults < User Preferences < Instance Forced
+// Simplified 2-layer config: App Defaults < User Preferences
 // See: openspec/changes/unify-configuration-architecture/
 
 /**
  * Instance-level settings schema
  * Settings that apply to the entire Quiqr instance
+ * File: instance_settings.json
  */
 export const instanceSettingsSchema = z.object({
   // Storage configuration
@@ -450,11 +450,17 @@ export const instanceSettingsSchema = z.object({
     dataFolder: z.string().default('~/Quiqr'),
   }).default({ type: 'fs', dataFolder: '~/Quiqr' }),
 
-  // Default preferences for new users (can be overridden per-user)
-  userDefaultPreferences: userPreferencesSchema.partial().default({}),
+  // Git configuration
+  git: z.object({
+    binaryPath: z.string().nullable().optional(),
+  }).default({}),
 
-  // Forced preferences that override user settings (admin control)
-  userForcedPreferences: userPreferencesSchema.partial().default({}),
+  // Logging configuration
+  logging: z.object({
+    retention: z.number().min(0).max(365).default(30),
+    logRetentionDays: z.number().min(0).max(365).default(30),
+    logLevel: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  }).default({ retention: 30, logRetentionDays: 30, logLevel: 'info' }),
 
   // Feature flags and experimental features
   experimentalFeatures: z.boolean().default(false),
@@ -462,31 +468,33 @@ export const instanceSettingsSchema = z.object({
   // Development settings
   dev: z.object({
     localApi: z.boolean().default(false),
-    disableAutoHugoServe: z.boolean().default(false),
     showCurrentUser: z.boolean().default(false),
-  }).default({ localApi: false, disableAutoHugoServe: false, showCurrentUser: false }),
+    disablePartialCache: z.boolean().default(false),
+  }).default({ localApi: false, showCurrentUser: false, disablePartialCache: false }),
 
   // Hugo-specific settings
   hugo: z.object({
     serveDraftMode: z.boolean().default(false),
-  }).default({ serveDraftMode: false }),
-
-  // Cache settings
-  disablePartialCache: z.boolean().default(false),
+    disableAutoHugoServe: z.boolean().default(false),
+  }).default({ serveDraftMode: false, disableAutoHugoServe: false }),
 })
 
 /**
  * User-level configuration schema
  * Contains user preferences and user-specific state
+ * File: user_prefs_ELECTRON.json (Electron edition) or user_prefs_[userId].json
  */
 export const userConfigSchema = z.object({
-  // User identifier (use 'default' for single-user mode)
-  userId: z.string().default('default'),
+  // User identifier ('ELECTRON' for Electron single-user edition)
+  userId: z.string().default('ELECTRON'),
 
-  // User preferences (overrides instance defaults, can be overridden by forced)
-  preferences: userPreferencesSchema.partial().default({}),
+  // User UI preferences (overrides app defaults)
+  preferences: z.object({
+    interfaceStyle: z.union([z.literal('quiqr10-dark'), z.literal('quiqr10-light')]).optional(),
+    customOpenCommand: z.string().optional(),
+  }).default({}),
 
-  // User-specific state
+  // Last opened site state
   lastOpenedSite: z.object({
     siteKey: z.string().nullable(),
     workspaceKey: z.string().nullable(),
@@ -496,14 +504,15 @@ export const userConfigSchema = z.object({
   // Last opened publish target per site
   lastOpenedPublishTargetForSite: z.record(z.string()).default({}),
 
-  // UI state
+  // UI state flags
   skipWelcomeScreen: z.boolean().default(false),
   sitesListingView: z.string().default('all'),
 })
 
 /**
- * Site-level settings schema
+ * Site-level settings schema (FUTURE - Not currently used)
  * Settings specific to a single site
+ * Deferred to future multi-user/multi-site changes
  */
 export const siteSettingsSchema = z.object({
   // Site identifier
@@ -521,12 +530,11 @@ export const siteSettingsSchema = z.object({
 
 /**
  * Configuration layer enum for precedence tracking
+ * Simplified to 2 layers
  */
 export const configLayerSchema = z.enum([
   'app-default',
-  'instance-default',
   'user',
-  'instance-forced',
 ])
 
 /**
@@ -542,9 +550,6 @@ export const configPropertyMetadataSchema = z.object({
 
   // Which layer provided this value
   source: configLayerSchema,
-
-  // Whether this property is locked (from forced layer)
-  locked: z.boolean(),
 
   // Type of the value
   type: z.enum(['string', 'number', 'boolean', 'object', 'array']),
@@ -570,41 +575,43 @@ export const envVarMappingSchema = z.object({
 
 /**
  * Standard environment variable mappings
- * Format: QUIQR_<SECTION>_<KEY> maps to <section>.<key>
+ * Format: QUIQR_<SECTION>_<KEY> maps to instance settings paths
+ * Environment variables can override instance_settings.json values
  */
 export const standardEnvMappings: z.infer<typeof envVarMappingSchema>[] = [
-  { envVar: 'STORAGE_TYPE', configPath: 'instance.storage.type', transform: 'string' },
-  { envVar: 'STORAGE_DATAFOLDER', configPath: 'instance.storage.dataFolder', transform: 'string' },
-  { envVar: 'EXPERIMENTAL_FEATURES', configPath: 'instance.experimentalFeatures', transform: 'boolean' },
-  { envVar: 'DEV_LOCAL_API', configPath: 'instance.dev.localApi', transform: 'boolean' },
-  { envVar: 'DEV_DISABLE_AUTO_HUGO_SERVE', configPath: 'instance.dev.disableAutoHugoServe', transform: 'boolean' },
-  { envVar: 'DEV_SHOW_CURRENT_USER', configPath: 'instance.dev.showCurrentUser', transform: 'boolean' },
-  { envVar: 'HUGO_SERVE_DRAFT_MODE', configPath: 'instance.hugo.serveDraftMode', transform: 'boolean' },
-  { envVar: 'DISABLE_PARTIAL_CACHE', configPath: 'instance.disablePartialCache', transform: 'boolean' },
+  { envVar: 'STORAGE_TYPE', configPath: 'storage.type', transform: 'string' },
+  { envVar: 'STORAGE_DATAFOLDER', configPath: 'storage.dataFolder', transform: 'string' },
+  { envVar: 'GIT_BINARY_PATH', configPath: 'git.binaryPath', transform: 'string' },
+  { envVar: 'LOGGING_RETENTION', configPath: 'logging.retention', transform: 'number' },
+  { envVar: 'LOGGING_RETENTION_DAYS', configPath: 'logging.logRetentionDays', transform: 'number' },
+  { envVar: 'LOGGING_LEVEL', configPath: 'logging.logLevel', transform: 'string' },
+  { envVar: 'EXPERIMENTAL_FEATURES', configPath: 'experimentalFeatures', transform: 'boolean' },
+  { envVar: 'DEV_LOCAL_API', configPath: 'dev.localApi', transform: 'boolean' },
+  { envVar: 'DEV_SHOW_CURRENT_USER', configPath: 'dev.showCurrentUser', transform: 'boolean' },
+  { envVar: 'DEV_DISABLE_PARTIAL_CACHE', configPath: 'dev.disablePartialCache', transform: 'boolean' },
+  { envVar: 'HUGO_SERVE_DRAFT_MODE', configPath: 'hugo.serveDraftMode', transform: 'boolean' },
+  { envVar: 'HUGO_DISABLE_AUTO_SERVE', configPath: 'hugo.disableAutoHugoServe', transform: 'boolean' },
 ]
 
 /**
- * Migration mapping from legacy config to unified config
+ * Legacy config mapping (DEPRECATED - No migration)
+ * Kept for reference only. Migration removed per design decision.
  */
 export const legacyToUnifiedMapping = {
-  // Instance-level mappings
-  'experimentalFeatures': 'instance.experimentalFeatures',
-  'disablePartialCache': 'instance.disablePartialCache',
-  'devLocalApi': 'instance.dev.localApi',
-  'devDisableAutoHugoServe': 'instance.dev.disableAutoHugoServe',
-  'devShowCurrentUser': 'instance.dev.showCurrentUser',
-  'hugoServeDraftMode': 'instance.hugo.serveDraftMode',
-
-  // User-level mappings (go to default user)
-  'prefs': 'user.preferences',
-  'lastOpenedSite': 'user.lastOpenedSite',
-  'lastOpenedPublishTargetForSite': 'user.lastOpenedPublishTargetForSite',
-  'skipWelcomeScreen': 'user.skipWelcomeScreen',
-  'sitesListingView': 'user.sitesListingView',
-  'currentUsername': 'user.userId',
-
-  // Storage mappings
-  'prefs.dataFolder': 'instance.storage.dataFolder',
+  // Reference mapping (not used in code)
+  // Old quiqr-app-config.json → new structure
+  'experimentalFeatures': 'instance_settings.json: experimentalFeatures',
+  'devLocalApi': 'instance_settings.json: dev.localApi',
+  'devShowCurrentUser': 'instance_settings.json: dev.showCurrentUser',
+  'disablePartialCache': 'instance_settings.json: dev.disablePartialCache',
+  'devDisableAutoHugoServe': 'instance_settings.json: hugo.disableAutoHugoServe',
+  'hugoServeDraftMode': 'instance_settings.json: hugo.serveDraftMode',
+  'prefs.dataFolder': 'instance_settings.json: storage.dataFolder',
+  'prefs.interfaceStyle': 'user_prefs_ELECTRON.json: preferences.interfaceStyle',
+  'lastOpenedSite': 'user_prefs_ELECTRON.json: lastOpenedSite',
+  'lastOpenedPublishTargetForSite': 'user_prefs_ELECTRON.json: lastOpenedPublishTargetForSite',
+  'skipWelcomeScreen': 'user_prefs_ELECTRON.json: skipWelcomeScreen',
+  'sitesListingView': 'user_prefs_ELECTRON.json: sitesListingView',
 } as const
 
 // Type exports for unified config

@@ -1,29 +1,48 @@
 /**
- * ConfigResolver - Layered configuration resolution
+ * ConfigResolver - Simplified 2-layer configuration resolution
  *
- * Resolves configuration values through the 4-layer hierarchy:
- * 1. App Defaults (lowest priority)
- * 2. Instance Defaults
- * 3. User Preferences
- * 4. Instance Forced (highest priority)
+ * Resolves configuration values through 2 layers:
+ * 1. App Defaults (lowest priority) - hardcoded in source
+ * 2. User Preferences (highest priority) - from user_prefs_ELECTRON.json
  *
- * Also handles environment variable overrides via EnvOverrideLayer.
+ * Instance settings are read directly without layering.
+ * Environment variables can override instance settings.
  */
 
-import type { InstanceSettings, UserConfig, UserPreferences, ConfigLayer, ConfigPropertyMetadata } from '@quiqr/types';
+import type { InstanceSettings, UserConfig, ConfigLayer, ConfigPropertyMetadata } from '@quiqr/types';
 import { ConfigStore } from './config-store.js';
 import { EnvOverrideLayer } from './env-override-layer.js';
 
 /**
  * App-level defaults (hardcoded fallbacks)
  */
-const APP_DEFAULT_PREFERENCES: UserPreferences = {
-  dataFolder: '~/Quiqr',
-  interfaceStyle: 'quiqr10-light',
-  sitesListingView: 'all',
-  libraryView: 'default',
-  showSplashAtStartup: true,
-  logRetentionDays: 30,
+const APP_DEFAULT_INSTANCE: InstanceSettings = {
+  storage: {
+    type: 'fs',
+    dataFolder: '~/Quiqr',
+  },
+  git: {
+    binaryPath: undefined,
+  },
+  logging: {
+    retention: 30,
+    logRetentionDays: 30,
+    logLevel: 'info',
+  },
+  experimentalFeatures: false,
+  dev: {
+    localApi: false,
+    showCurrentUser: false,
+    disablePartialCache: false,
+  },
+  hugo: {
+    serveDraftMode: false,
+    disableAutoHugoServe: false,
+  },
+};
+
+const APP_DEFAULT_USER_PREFS = {
+  interfaceStyle: 'quiqr10-light' as const,
 };
 
 /**
@@ -32,7 +51,6 @@ const APP_DEFAULT_PREFERENCES: UserPreferences = {
 export interface ResolvedValue<T> {
   value: T;
   source: ConfigLayer;
-  locked: boolean;
   path: string;
 }
 
@@ -44,7 +62,7 @@ export class ConfigResolver {
   private envLayer: EnvOverrideLayer;
   private instanceSettings: InstanceSettings | null = null;
   private userConfig: UserConfig | null = null;
-  private currentUserId: string = 'default';
+  private currentUserId: string = 'ELECTRON';
 
   constructor(store: ConfigStore, envLayer: EnvOverrideLayer) {
     this.store = store;
@@ -54,7 +72,7 @@ export class ConfigResolver {
   /**
    * Initialize the resolver by loading configs
    */
-  async initialize(userId: string = 'default'): Promise<void> {
+  async initialize(userId: string = 'ELECTRON'): Promise<void> {
     this.currentUserId = userId;
     await this.reload();
   }
@@ -70,7 +88,7 @@ export class ConfigResolver {
   /**
    * Initialize the resolver synchronously
    */
-  initializeSync(userId: string = 'default'): void {
+  initializeSync(userId: string = 'ELECTRON'): void {
     this.currentUserId = userId;
     this.reloadSync();
   }
@@ -99,67 +117,30 @@ export class ConfigResolver {
   }
 
   /**
-   * Resolve a user preference through all layers
+   * Resolve a user preference through 2 layers
    *
    * Resolution order (highest to lowest priority):
-   * 1. Environment variable override
-   * 2. Instance forced preferences
-   * 3. User preferences
-   * 4. Instance default preferences
-   * 5. App defaults
+   * 1. User preferences (from user_prefs_ELECTRON.json)
+   * 2. App defaults (hardcoded)
    */
-  resolvePreference<K extends keyof UserPreferences>(key: K): ResolvedValue<UserPreferences[K]> {
+  resolvePreference(key: string): ResolvedValue<unknown> {
     const path = `user.preferences.${key}`;
-
-    // Check environment override first (highest priority outside forced)
-    const envPath = `instance.settings.userForcedPreferences.${key}`;
-    if (this.envLayer.hasOverride(envPath)) {
-      return {
-        value: this.envLayer.getOverride(envPath) as UserPreferences[K],
-        source: 'instance-forced',
-        locked: true,
-        path,
-      };
-    }
-
-    // Check instance forced preferences
-    const forcedPrefs = this.instanceSettings?.userForcedPreferences || {};
-    if (key in forcedPrefs && forcedPrefs[key] !== undefined) {
-      return {
-        value: forcedPrefs[key] as UserPreferences[K],
-        source: 'instance-forced',
-        locked: true,
-        path,
-      };
-    }
 
     // Check user preferences
     const userPrefs = this.userConfig?.preferences || {};
-    if (key in userPrefs && userPrefs[key] !== undefined) {
+    if (key in userPrefs && userPrefs[key as keyof typeof userPrefs] !== undefined) {
       return {
-        value: userPrefs[key] as UserPreferences[K],
+        value: userPrefs[key as keyof typeof userPrefs],
         source: 'user',
-        locked: false,
-        path,
-      };
-    }
-
-    // Check instance default preferences
-    const defaultPrefs = this.instanceSettings?.userDefaultPreferences || {};
-    if (key in defaultPrefs && defaultPrefs[key] !== undefined) {
-      return {
-        value: defaultPrefs[key] as UserPreferences[K],
-        source: 'instance-default',
-        locked: false,
         path,
       };
     }
 
     // Fall back to app defaults
+    const appDefault = APP_DEFAULT_USER_PREFS[key as keyof typeof APP_DEFAULT_USER_PREFS];
     return {
-      value: APP_DEFAULT_PREFERENCES[key] as UserPreferences[K],
+      value: appDefault,
       source: 'app-default',
-      locked: false,
       path,
     };
   }
@@ -167,84 +148,83 @@ export class ConfigResolver {
   /**
    * Get the effective value of a preference (without metadata)
    */
-  getEffectivePreference<K extends keyof UserPreferences>(key: K): UserPreferences[K] {
+  getEffectivePreference(key: string): unknown {
     return this.resolvePreference(key).value;
   }
 
   /**
    * Get all effective preferences merged
    */
-  getEffectivePreferences(): UserPreferences {
-    const result: Partial<UserPreferences> = {};
+  getEffectivePreferences(): Record<string, unknown> {
+    const result: Record<string, unknown> = { ...APP_DEFAULT_USER_PREFS };
 
-    // Get all possible preference keys from app defaults
-    const allKeys = Object.keys(APP_DEFAULT_PREFERENCES) as (keyof UserPreferences)[];
+    // Merge user preferences
+    const userPrefs = this.userConfig?.preferences || {};
+    Object.assign(result, userPrefs);
 
-    // Also include keys from other layers
-    const instanceDefaultKeys = Object.keys(this.instanceSettings?.userDefaultPreferences || {});
-    const instanceForcedKeys = Object.keys(this.instanceSettings?.userForcedPreferences || {});
-    const userPrefKeys = Object.keys(this.userConfig?.preferences || {});
-
-    const uniqueKeys = new Set([
-      ...allKeys,
-      ...instanceDefaultKeys,
-      ...instanceForcedKeys,
-      ...userPrefKeys,
-    ]) as Set<keyof UserPreferences>;
-
-    for (const key of uniqueKeys) {
-      result[key] = this.getEffectivePreference(key);
-    }
-
-    return result as UserPreferences;
+    return result;
   }
 
   /**
-   * Check if a preference is locked (forced by instance)
+   * Resolve an instance setting with environment override support
    */
-  isPreferenceLocked<K extends keyof UserPreferences>(key: K): boolean {
-    return this.resolvePreference(key).locked;
-  }
-
-  /**
-   * Resolve an instance setting
-   */
-  resolveInstanceSetting<K extends keyof InstanceSettings>(key: K): ResolvedValue<InstanceSettings[K]> {
-    const configPath = `instance.settings.${key}`;
+  resolveInstanceSetting(path: string): ResolvedValue<unknown> {
+    const configPath = path;
 
     // Check environment override
     if (this.envLayer.hasOverride(configPath)) {
-      const envValue = this.envLayer.getOverride(configPath);
+      const override = this.envLayer.getOverride(configPath);
       return {
-        value: envValue as unknown as InstanceSettings[K],
-        source: 'instance-default',
-        locked: true,
+        value: override?.value,
+        source: 'user', // Environment is user-level override
         path: configPath,
       };
     }
 
-    // Return from instance settings (no layering for instance settings)
-    const value = this.instanceSettings?.[key];
+    // Get value from instance settings
+    const value = this.getNestedValue(this.instanceSettings, path);
     if (value !== undefined) {
       return {
         value,
-        source: 'instance-default',
-        locked: false,
+        source: 'user',
         path: configPath,
       };
     }
 
-    // Return default - use a simple default object
-    const defaults: Partial<InstanceSettings> = {
-      experimentalFeatures: false,
-      disablePartialCache: false,
-    };
+    // Fall back to app default
+    const defaultValue = this.getNestedValue(APP_DEFAULT_INSTANCE, path);
     return {
-      value: defaults[key] as InstanceSettings[K],
+      value: defaultValue,
       source: 'app-default',
-      locked: false,
       path: configPath,
     };
+  }
+
+  /**
+   * Get effective instance setting value
+   */
+  getEffectiveInstanceSetting(path: string): unknown {
+    return this.resolveInstanceSetting(path).value;
+  }
+
+  /**
+   * Get nested value from object using dot notation
+   */
+  private getNestedValue(obj: unknown, path: string): unknown {
+    if (!obj || typeof obj !== 'object') return undefined;
+
+    const parts = path.split('.');
+    let current: any = obj;
+
+    for (const part of parts) {
+      if (current && typeof current === 'object' && part in current) {
+        current = current[part];
+      } else {
+        return undefined;
+      }
+    }
+
+    return current;
   }
 
   /**
@@ -255,46 +235,40 @@ export class ConfigResolver {
     const metadata: ConfigPropertyMetadata[] = [];
 
     // Add user preferences
-    const allPrefKeys = Object.keys(APP_DEFAULT_PREFERENCES) as (keyof UserPreferences)[];
-    for (const key of allPrefKeys) {
+    const prefKeys = Object.keys(APP_DEFAULT_USER_PREFS);
+    for (const key of prefKeys) {
       const resolved = this.resolvePreference(key);
       metadata.push({
         path: resolved.path,
         value: resolved.value,
         source: resolved.source,
-        locked: resolved.locked,
         type: typeof resolved.value as 'string' | 'number' | 'boolean' | 'object',
         description: `User preference: ${key}`,
       });
     }
 
     // Add instance settings
-    if (this.instanceSettings) {
-      metadata.push({
-        path: 'instance.settings.storage.type',
-        value: this.instanceSettings.storage.type,
-        source: 'instance-default',
-        locked: this.envLayer.hasOverride('instance.settings.storage.type'),
-        type: 'string',
-        description: 'Storage backend type',
-      });
+    const instancePaths = [
+      'storage.type',
+      'storage.dataFolder',
+      'logging.logRetentionDays',
+      'logging.logLevel',
+      'experimentalFeatures',
+      'dev.localApi',
+      'dev.showCurrentUser',
+      'dev.disablePartialCache',
+      'hugo.serveDraftMode',
+      'hugo.disableAutoHugoServe',
+    ];
 
+    for (const path of instancePaths) {
+      const resolved = this.resolveInstanceSetting(path);
       metadata.push({
-        path: 'instance.settings.storage.dataFolder',
-        value: this.instanceSettings.storage.dataFolder,
-        source: 'instance-default',
-        locked: this.envLayer.hasOverride('instance.settings.storage.dataFolder'),
-        type: 'string',
-        description: 'Default data folder path',
-      });
-
-      metadata.push({
-        path: 'instance.settings.experimentalFeatures',
-        value: this.instanceSettings.experimentalFeatures,
-        source: 'instance-default',
-        locked: this.envLayer.hasOverride('instance.settings.experimentalFeatures'),
-        type: 'boolean',
-        description: 'Enable experimental features',
+        path: `instance.${path}`,
+        value: resolved.value,
+        source: resolved.source,
+        type: typeof resolved.value as 'string' | 'number' | 'boolean' | 'object',
+        description: `Instance setting: ${path}`,
       });
     }
 
@@ -313,5 +287,45 @@ export class ConfigResolver {
    */
   getUserConfig(): UserConfig | null {
     return this.userConfig;
+  }
+
+  /**
+   * Get user state (non-preference fields from user config)
+   */
+  getUserState<K extends keyof UserConfig>(key: K): UserConfig[K] | undefined {
+    return this.userConfig?.[key];
+  }
+
+  /**
+   * Save user preference
+   */
+  async saveUserPreference(key: string, value: unknown): Promise<void> {
+    if (!this.userConfig) {
+      throw new Error('User config not loaded');
+    }
+
+    // Update in-memory config
+    this.userConfig.preferences = {
+      ...this.userConfig.preferences,
+      [key]: value,
+    };
+
+    // Save to file
+    await this.store.saveUserConfig(this.currentUserId, this.userConfig);
+  }
+
+  /**
+   * Save user state field
+   */
+  async saveUserState<K extends keyof UserConfig>(key: K, value: UserConfig[K]): Promise<void> {
+    if (!this.userConfig) {
+      throw new Error('User config not loaded');
+    }
+
+    // Update in-memory config
+    this.userConfig[key] = value;
+
+    // Save to file
+    await this.store.saveUserConfig(this.currentUserId, this.userConfig);
   }
 }

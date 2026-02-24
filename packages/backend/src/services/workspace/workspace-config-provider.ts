@@ -22,7 +22,7 @@ import { WorkspaceConfigValidator, type WorkspaceConfig } from './workspace-conf
 import { InitialWorkspaceConfigBuilder } from './initial-workspace-config-builder.js';
 import { FileCacheToken } from './file-cache-token.js';
 import type { PathHelper, EnvironmentInfo } from '../../utils/path-helper.js';
-import type { AppConfig } from '../../config/app-config.js';
+import type { UnifiedConfigService } from '../../config/unified-config-service.js';
 import {
   type MergeableConfigItem,
   type PartialWorkspaceConfig,
@@ -62,18 +62,18 @@ export class WorkspaceConfigProvider {
   };
   private formatProviderResolver: FormatProviderResolver;
   private pathHelper: PathHelper;
-  private appConfig: AppConfig;
+  private unifiedConfig: UnifiedConfigService;
   private environmentInfo: EnvironmentInfo;
 
   constructor(
     formatProviderResolver: FormatProviderResolver,
     pathHelper: PathHelper,
-    appConfig: AppConfig,
+    unifiedConfig: UnifiedConfigService,
     environmentInfo: EnvironmentInfo
   ) {
     this.formatProviderResolver = formatProviderResolver;
     this.pathHelper = pathHelper;
-    this.appConfig = appConfig;
+    this.unifiedConfig = unifiedConfig;
     this.environmentInfo = environmentInfo;
   }
 
@@ -452,7 +452,8 @@ export class WorkspaceConfigProvider {
         mergeKey
       );
 
-      if (this.appConfig.disablePartialCache || !fs.existsSync(filePartial)) {
+      const disablePartialCache = this.unifiedConfig.getInstanceSetting('dev.disablePartialCache') as boolean;
+      if (disablePartialCache || !fs.existsSync(filePartial)) {
         await fs.copy(mergeKey._mergePartial.substring(7), filePartial);
       }
     } else if (
@@ -464,7 +465,8 @@ export class WorkspaceConfigProvider {
         mergeKey
       );
 
-      if (this.appConfig.disablePartialCache || !fs.existsSync(filePartial)) {
+      const disablePartialCache = this.unifiedConfig.getInstanceSetting('dev.disablePartialCache') as boolean;
+      if (disablePartialCache || !fs.existsSync(filePartial)) {
         await this._getRemotePartial(mergeKey._mergePartial, filePartial);
       }
     } else if (mergeKey._mergePartial.startsWith('dogfood_site://')) {

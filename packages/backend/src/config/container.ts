@@ -236,7 +236,7 @@ export function createContainer(options: ContainerOptions): AppContainer {
     adapters.appInfo,
     rootPath,
     () => ({
-      dataFolder: unifiedConfig.getEffectivePreference('dataFolder'),
+      dataFolder: unifiedConfig.getInstanceSetting('storage.dataFolder') as string,
       currentSitePath: state.currentSitePath,
     })
   );
@@ -285,7 +285,7 @@ export function createContainer(options: ContainerOptions): AppContainer {
   const workspaceConfigProvider = new WorkspaceConfigProvider(
     formatResolver,
     pathHelper,
-    config,
+    unifiedConfig,
     environmentInfo
   );
 

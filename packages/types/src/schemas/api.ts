@@ -22,7 +22,6 @@ import { fieldSchema } from './fields.js'
 export const resolvedPreferenceSchema = z.object({
   value: z.unknown(),
   source: configLayerSchema,
-  locked: z.boolean(),
   path: z.string()
 })
 
@@ -461,7 +460,6 @@ export const apiSchemas = {
   getEffectivePreferences: userPreferencesSchema,
   setUserPreference: z.boolean(),
   setUserPreferences: z.boolean(),
-  isPreferenceLocked: z.boolean(),
   getAllPropertyMetadata: z.array(configPropertyMetadataSchema),
   getInstanceSettings: instanceSettingsSchema,
   getInstanceSetting: z.unknown(),
@@ -471,7 +469,8 @@ export const apiSchemas = {
   getCurrentUserId: z.string(),
   switchUser: z.boolean(),
   listUsers: z.array(z.string()),
-  isExperimentalFeaturesEnabled: z.boolean()
+  isExperimentalFeaturesEnabled: z.boolean(),
+  executeCustomOpenCommand: z.boolean()
 } as const
 
 // Type exports

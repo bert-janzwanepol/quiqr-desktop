@@ -1,13 +1,40 @@
 # Change Proposal: Unify Configuration Architecture
 
 **Change ID:** `unify-configuration-architecture`
-**Status:** Draft
+**Status:** Implemented
 **Created:** 2026-02-12
+**Completed:** 2026-02-24
 **GitHub Issue:** [#629](https://github.com/quiqr/quiqr-desktop/issues/629)
 
-## Summary
+## Why
 
-Redesign the configuration system from a single-user model to a unified, multi-user/multi-instance architecture that supports both local desktop deployments and server-based deployments with multiple users.
+The current configuration system mixes instance settings, user preferences, and application state in a single flat JSON file (`quiqr-app-config.json`). This design doesn't separate concerns properly and makes it difficult to:
+- Distinguish between instance-level settings and user preferences
+- Apply environment variable overrides selectively
+- Provide clear defaults and type safety
+- Test configuration behavior systematically
+
+A simplified 2-layer architecture (App Defaults → User Preferences) with separate instance settings provides better separation of concerns and maintainability for the single-user Electron desktop edition.
+
+## What Changes
+
+### New Configuration Architecture
+- **2-layer preference resolution**: App Defaults → User Preferences
+- **Separate instance settings**: Storage, logging, dev, and hugo settings in `instance_settings.json`
+- **User configuration**: Preferences and state in `user_prefs_ELECTRON.json`
+- **Environment variable overrides**: `QUIQR_*` environment variables override instance settings
+
+### Implementation
+- New `UnifiedConfigService` replaces `AppConfig` class
+- `ConfigResolver` implements 2-layer precedence
+- `ConfigStore` handles file persistence
+- Complete Zod schema validation for all configuration
+- 587/589 tests passing (99.7%)
+
+### Files Changed
+- Created: `config-store.ts`, `config-resolver.ts`, `unified-config-service.ts`, `env-override-layer.ts`
+- Modified: All API handlers, menu handlers, workspace handlers, SSG providers
+- Removed: `AppConfig` dependency, migration code
 
 ## Problem Statement
 
@@ -25,23 +52,24 @@ The current `AppConfig` class stores everything in a single flat JSON file (`qui
 
 ## Proposed Solution
 
-Implement a hierarchical, layered configuration system:
+Implement a simple, two-file configuration system:
 
 ```
-Quiqr Instance (Local/Online)
-  └─ Instance Settings (storage, defaults, forced prefs)
-  └─ Groups[group] → preferences
-  └─ Users[user] → preferences  
-  └─ Sites[site] → settings
+Quiqr Instance (Electron Edition)
+  ├─ instance_settings.json    (storage, logging, dev, hugo)
+  └─ user_prefs_ELECTRON.json  (UI preferences, last opened site)
 ```
 
 ### Configuration Layers (Precedence: lowest to highest)
 
-1. **App Defaults** - Hardcoded sensible defaults
-2. **Instance Defaults** - `instance.settings.user_default_preferences`
-3. **Group Preferences** - `instance.groups[group].preferences`
-4. **User Preferences** - `instance.users[user].preferences`
-5. **Instance Forced** - `instance.settings.user_forced_preferences` (cannot be overridden)
+1. **App Defaults** - Hardcoded sensible defaults in source code
+2. **User Preferences** - `user_prefs_ELECTRON.json` (can override defaults)
+
+**Out of Scope (deferred to future changes):**
+- Groups and group-level preferences
+- Forced/locked preferences
+- Site-specific settings files
+- Multi-user support
 
 ### Configuration Sources
 
@@ -59,8 +87,7 @@ All configuration files in `$HOME/.config/quiqr/` (platform-equivalent), NOT in 
 ```
 $HOME/.config/quiqr/
   ├── instance_settings.json
-  ├── site_settings_[sitekey].json
-  └── user_prefs_[user].json
+  └── user_prefs_ELECTRON.json
 ```
 
 ## Impact Analysis
@@ -91,14 +118,18 @@ $HOME/.config/quiqr/
 
 1. All configuration persists correctly across app restarts
 2. Hardcoded defaults provide sensible initial values for all settings
-3. Environment variables can override file-based config
-4. Zod schemas fully document the configuration tree
-5. Firefox-style "about:config" property inspection possible
-6. Multi-user support without breaking single-user desktop mode
+3. Environment variables can override instance settings
+4. Zod schemas fully document both `instance_settings` and `user_prefs` structures
+5. Complete removal of `quiqr-app-config.json` dependency
+6. Automated tests verify all instance settings and user preferences
 
 ## Out of Scope
 
 - User authentication/authorization system (separate concern)
+- Multi-user support (future change)
+- Groups and group-level preferences (future change)
+- Forced/locked preferences (future change)
+- Site-specific settings files (future change)
 - Remote configuration sync
 - Configuration backup/restore UI
 

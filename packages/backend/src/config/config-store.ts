@@ -20,20 +20,21 @@ export type ConfigType = 'instance' | 'user' | 'site';
  */
 const DEFAULT_INSTANCE_SETTINGS: InstanceSettings = {
   storage: { type: 'fs', dataFolder: '~/Quiqr' },
-  userDefaultPreferences: {},
-  userForcedPreferences: {},
+  git: { binaryPath: undefined },
+  logging: { logRetentionDays: 30, retention: 30, logLevel: 'info' },
   experimentalFeatures: false,
-  dev: { localApi: false, disableAutoHugoServe: false, showCurrentUser: false },
-  hugo: { serveDraftMode: false },
-  disablePartialCache: false,
+  dev: { localApi: false, showCurrentUser: false, disablePartialCache: false },
+  hugo: { serveDraftMode: false, disableAutoHugoServe: false },
 };
 
 /**
  * Default user config factory
+ * For Electron edition, userId is 'ELECTRON'
+ * Empty preferences allows ConfigResolver to properly fall back to app defaults
  */
 const getDefaultUserConfig = (userId: string): UserConfig => ({
   userId,
-  preferences: {},
+  preferences: {}, // Empty - app defaults handled by ConfigResolver
   lastOpenedSite: { siteKey: null, workspaceKey: null, sitePath: null },
   lastOpenedPublishTargetForSite: {},
   skipWelcomeScreen: false,
@@ -80,7 +81,8 @@ export class ConfigStore {
       case 'instance':
         return path.join(this.configDir, 'instance_settings.json');
       case 'user':
-        const userId = identifier || 'default';
+        // Default to 'ELECTRON' for Electron single-user edition
+        const userId = identifier || 'ELECTRON';
         return path.join(this.configDir, `user_prefs_${userId}.json`);
       case 'site':
         if (!identifier) throw new Error('Site key required for site config');
@@ -166,7 +168,7 @@ export class ConfigStore {
   /**
    * Read user config (synchronous)
    */
-  readUserConfigSync(userId: string = 'default'): UserConfig {
+  readUserConfigSync(userId: string = 'ELECTRON'): UserConfig {
     const filePath = this.getFilePath('user', userId);
     const defaults = getDefaultUserConfig(userId);
 
@@ -188,14 +190,21 @@ export class ConfigStore {
   /**
    * Write user config
    */
-  async writeUserConfig(config: UserConfig, userId: string = 'default'): Promise<void> {
+  async writeUserConfig(config: UserConfig, userId: string = 'ELECTRON'): Promise<void> {
     await this.ensureConfigDir();
     const filePath = this.getFilePath('user', userId);
     await fs.writeFile(filePath, JSON.stringify({ ...config, userId }, null, 2), 'utf8');
   }
 
   /**
-   * Read site settings
+   * Save user config (alias for writeUserConfig)
+   */
+  async saveUserConfig(userId: string, config: UserConfig): Promise<void> {
+    await this.writeUserConfig(config, userId);
+  }
+
+  /**
+   * Read site settings (FUTURE - not currently used in simplified architecture)
    */
   async readSiteSettings(siteKey: string): Promise<SiteSettings> {
     const filePath = this.getFilePath('site', siteKey);
@@ -206,8 +215,9 @@ export class ConfigStore {
         const content = await fs.readFile(filePath, 'utf8');
         const parsed = JSON.parse(content);
         // Merge with defaults and validate
-        const merged = this.deepMerge(defaults, parsed);
-        return siteSettingsSchema.parse(merged);
+        const merged = this.deepMerge(defaults, parsed) as SiteSettings;
+        const validated = siteSettingsSchema?.parse(merged);
+        return validated || merged;
       }
     } catch (err) {
       console.warn(`Failed to read site settings for ${siteKey}:`, err);
@@ -217,7 +227,7 @@ export class ConfigStore {
   }
 
   /**
-   * Write site settings
+   * Write site settings (FUTURE - not currently used in simplified architecture)
    */
   async writeSiteSettings(settings: SiteSettings): Promise<void> {
     await this.ensureConfigDir();

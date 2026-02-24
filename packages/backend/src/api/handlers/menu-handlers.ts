@@ -70,8 +70,7 @@ export function createExecuteMenuActionHandler(container: AppContainer) {
         // ====================================================================
         case 'setRole':
           if (actionParam) {
-            container.config.setPrefKey('applicationRole', actionParam);
-            await container.config.save();
+            await container.unifiedConfig.setUserPreference('applicationRole', actionParam);
             container.adapters.menu.createMainMenu(); // Rebuild menu
             // Trigger page reload to refresh workspace view with new role
             return { type: 'reload', message: `Switched to ${actionParam} role` };
@@ -80,36 +79,36 @@ export function createExecuteMenuActionHandler(container: AppContainer) {
 
         case 'toggleExperimental':
           {
-            const newValue = !container.config.experimentalFeatures;
-            container.config.setExperimentalFeatures(newValue);
-            await container.config.save();
+            const currentValue = container.unifiedConfig.getInstanceSetting('experimentalFeatures') as boolean;
+            const newValue = !currentValue;
+            await container.unifiedConfig.updateInstanceSettings({ experimentalFeatures: newValue });
             container.adapters.menu.createMainMenu();
             return { type: 'success', refresh: true };
           }
 
         case 'toggleDraftMode':
           {
-            const newValue = !container.config.hugoServeDraftMode;
-            container.config.setHugoServeDraftMode(newValue);
-            await container.config.save();
+            const currentValue = container.unifiedConfig.getInstanceSetting('hugo.serveDraftMode') as boolean;
+            const newValue = !currentValue;
+            await container.unifiedConfig.updateInstanceSettings({ hugo: { serveDraftMode: newValue } });
             container.adapters.menu.createMainMenu();
             return { type: 'success', refresh: true };
           }
 
         case 'toggleAutoServe':
           {
-            const newValue = !container.config.devDisableAutoHugoServe;
-            container.config.setDevDisableAutoHugoServe(newValue);
-            await container.config.save();
+            const currentValue = container.unifiedConfig.getInstanceSetting('hugo.disableAutoHugoServe') as boolean;
+            const newValue = !currentValue;
+            await container.unifiedConfig.updateInstanceSettings({ hugo: { disableAutoHugoServe: newValue } });
             container.adapters.menu.createMainMenu();
             return { type: 'success', refresh: true };
           }
 
         case 'togglePartialCache':
           {
-            const newValue = !container.config.disablePartialCache;
-            container.config.setDisablePartialCache(newValue);
-            await container.config.save();
+            const currentValue = container.unifiedConfig.getInstanceSetting('dev.disablePartialCache') as boolean;
+            const newValue = !currentValue;
+            await container.unifiedConfig.updateInstanceSettings({ dev: { disablePartialCache: newValue } });
             container.adapters.menu.createMainMenu();
             return { type: 'success', refresh: true };
           }

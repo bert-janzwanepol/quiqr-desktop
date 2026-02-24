@@ -162,6 +162,22 @@ export function createMockContainer(): AppContainer {
       clearCurrentSite: vi.fn(),
     },
     config: {} as any,
+    unifiedConfig: {
+      getInstanceSetting: vi.fn((path: string) => {
+        // Return default values for common settings
+        if (path === 'hugo.serveDraftMode') return false;
+        if (path === 'hugo.disableAutoHugoServe') return false;
+        if (path === 'dev.disablePartialCache') return false;
+        if (path === 'experimentalFeatures') return false;
+        if (path === 'storage.dataFolder') return '~/Quiqr';
+        return undefined;
+      }),
+      getEffectivePreference: vi.fn(),
+      setUserPreference: vi.fn(),
+      setUserState: vi.fn(),
+      getUserState: vi.fn(),
+      updateInstanceSettings: vi.fn(),
+    } as any,
   } as any;
 }
 

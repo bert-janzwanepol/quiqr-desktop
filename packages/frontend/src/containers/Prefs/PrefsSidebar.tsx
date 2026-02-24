@@ -18,12 +18,6 @@ export const PrefsSidebar = (props: PrefsSidebarProps) => {
         to: '/prefs/general',
         exact: true,
       },
-      {
-        active: true,
-        label: 'Advanced',
-        to: '/prefs/advanced',
-        exact: true,
-      },
     ],
   };
 
@@ -34,6 +28,18 @@ export const PrefsSidebar = (props: PrefsSidebarProps) => {
         active: true,
         label: 'Storage',
         to: '/prefs/storage',
+        exact: true,
+      },
+      {
+        active: true,
+        label: 'Git',
+        to: '/prefs/git',
+        exact: true,
+      },
+      {
+        active: true,
+        label: 'Logging',
+        to: '/prefs/logging',
         exact: true,
       },
     ],
