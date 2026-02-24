@@ -48,22 +48,29 @@ export class MenuManager {
   }
 
   /**
-   * Update menu options from container config
+   * Update menu options from container config (using unified config service)
    */
   private updateOptionsFromConfig(): void {
     if (!this.container) return;
 
-    const config = this.container.config;
     const state = this.container.state;
+    const unifiedConfig = this.container.unifiedConfig;
+
+    // Get values and ensure proper type coercion
+    const experimentalFeatures = unifiedConfig.getInstanceSetting('experimentalFeatures');
+    const disablePartialCache = unifiedConfig.getInstanceSetting('dev.disablePartialCache');
+    const hugoServeDraftMode = unifiedConfig.getInstanceSetting('hugo.serveDraftMode');
+    const devDisableAutoHugoServe = unifiedConfig.getInstanceSetting('hugo.disableAutoHugoServe');
+    const applicationRole = unifiedConfig.getEffectivePreference('applicationRole');
 
     this.options = {
       ...this.options,
       siteSelected: !!state.currentSiteKey,
-      experimentalFeatures: config.experimentalFeatures,
-      disablePartialCache: config.disablePartialCache,
-      hugoServeDraftMode: config.hugoServeDraftMode,
-      devDisableAutoHugoServe: config.devDisableAutoHugoServe,
-      applicationRole: config.prefs.applicationRole || 'contentEditor'
+      experimentalFeatures: experimentalFeatures === true,
+      disablePartialCache: disablePartialCache === true,
+      hugoServeDraftMode: hugoServeDraftMode === true,
+      devDisableAutoHugoServe: devDisableAutoHugoServe === true,
+      applicationRole: (typeof applicationRole === 'string' ? applicationRole : 'contentEditor')
     };
   }
 
@@ -239,10 +246,11 @@ export class MenuManager {
             label: 'Preferences',
             click: () => this.showPreferences()
           },
-          {
-            label: 'Role',
-            submenu: this.createRolesSubmenu()
-          },
+          // Role menu item removed - now available in Preferences > Advanced
+          // {
+          //   label: 'Role',
+          //   submenu: this.createRolesSubmenu()
+          // },
           { type: 'separator' as const },
           { role: 'services' as const },
           { type: 'separator' as const },
@@ -385,31 +393,13 @@ export class MenuManager {
             label: 'Preferences',
             click: () => this.showPreferences()
           },
-          {
-            label: 'Role',
-            submenu: this.createRolesSubmenu()
-          },
+          // Role menu item removed - now available in Preferences > Behaviour
+          // {
+          //   label: 'Role',
+          //   submenu: this.createRolesSubmenu()
+          // },
+          // Enable Experimental menu item removed - now available in Application Settings > Feature Flags
           { type: 'separator' as const },
-          {
-            label: 'Enable Experimental',
-            type: 'checkbox',
-            checked: this.options.experimentalFeatures,
-            click: async () => {
-
-              if (!this.container) return;
-
-              try {
-                const newValue = !this.options.experimentalFeatures;
-                this.container.config.setExperimentalFeatures(newValue);
-                await this.container.config.save();
-
-                this.updateOptionsFromConfig();
-                this.createMainMenu();
-              } catch (error) {
-                console.error('Failed to toggle experimental features:', error);
-              }
-            }
-          },
           ...(this.options.experimentalFeatures ? [{
             label: 'Experimental',
             submenu: this.createExperimentalSubmenu()
@@ -468,49 +458,8 @@ export class MenuManager {
                 console.error('Failed to restart Hugo server:', error);
               }
             }
-          },
-          { type: 'separator' },
-          {
-            label: 'Server Draft Mode',
-            type: 'checkbox',
-            checked: this.options.hugoServeDraftMode,
-            click: async () => {
-              if (!this.container) return;
-
-              try {
-                const newValue = !this.options.hugoServeDraftMode;
-                this.container.config.setHugoServeDraftMode(newValue);
-                await this.container.config.save();
-
-                this.updateOptionsFromConfig();
-                this.createMainMenu();
-
-                // Note: The server will need to be restarted for this to take effect
-                console.log(`Draft mode ${newValue ? 'enabled' : 'disabled'}. Restart server for changes to take effect.`);
-              } catch (error) {
-                console.error('Failed to toggle draft mode:', error);
-              }
-            }
-          },
-          {
-            label: 'Disable Auto Serve',
-            type: 'checkbox',
-            checked: this.options.devDisableAutoHugoServe,
-            click: async () => {
-              if (!this.container) return;
-
-              try {
-                const newValue = !this.options.devDisableAutoHugoServe;
-                this.container.config.setDevDisableAutoHugoServe(newValue);
-                await this.container.config.save();
-
-                this.updateOptionsFromConfig();
-                this.createMainMenu();
-              } catch (error) {
-                console.error('Failed to toggle auto serve:', error);
-              }
-            }
           }
+          // Hugo settings (Server Draft Mode, Disable Auto Serve) removed - now available in Application Settings > Hugo
         ]
       },
 

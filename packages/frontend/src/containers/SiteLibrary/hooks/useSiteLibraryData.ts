@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import service from '../../../services/service';
-import { configQueryOptions } from '../../../queries/options';
+import { configQueryOptions, prefsQueryOptions } from '../../../queries/options';
 import { useInvalidateConfigurations } from '../../../queries/hooks';
 import * as api from '../../../api';
 
 export function useSiteLibraryData() {
-  const [sitesListingView, setSitesListingView] = useState('');
   const invalidate = useInvalidateConfigurations();
 
   const { data: configurations = { sites: [] }, isError, error } = useQuery(configQueryOptions.all());
@@ -17,13 +16,12 @@ export function useSiteLibraryData() {
     staleTime: 10 * 60 * 1000, // 10 minutes - remote template list is slow to change
   });
 
+  // Fetch sitesListingView using unified config API
+  const { data: prefs } = useQuery(prefsQueryOptions.all());
+  const sitesListingView = (prefs?.sitesListingView as string | undefined) ?? 'cards';
+
   useEffect(() => {
     service.api.stopHugoServer();
-    service.api.readConfPrefKey('sitesListingView').then((view) => {
-      if (typeof view === 'string') {
-        setSitesListingView(view);
-      }
-    });
   }, []);
 
   return {

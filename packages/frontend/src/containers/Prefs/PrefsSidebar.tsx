@@ -14,8 +14,14 @@ export const PrefsSidebar = (props: PrefsSidebarProps) => {
     items: [
       {
         active: true,
-        label: 'General',
+        label: 'Appearance',
         to: '/prefs/general',
+        exact: true,
+      },
+      {
+        active: true,
+        label: 'Behaviour',
+        to: '/prefs/advanced',
         exact: true,
       },
     ],
@@ -40,6 +46,18 @@ export const PrefsSidebar = (props: PrefsSidebarProps) => {
         active: true,
         label: 'Logging',
         to: '/prefs/logging',
+        exact: true,
+      },
+      {
+        active: true,
+        label: 'Hugo',
+        to: '/prefs/hugo',
+        exact: true,
+      },
+      {
+        active: true,
+        label: 'Feature Flags',
+        to: '/prefs/appsettings-general',
         exact: true,
       },
     ],

@@ -63,7 +63,7 @@ export class WebMenuAdapter implements MenuAdapter {
   }
 
   /**
-   * Build menu state from container config
+   * Build menu state from container config (using unified config service)
    */
   private buildMenuState(): void {
     if (!this.container) {
@@ -71,9 +71,16 @@ export class WebMenuAdapter implements MenuAdapter {
       return;
     }
 
-    const config = this.container.config;
+    const unifiedConfig = this.container.unifiedConfig;
     const state = this.container.state;
     const siteSelected = !!state.currentSiteKey;
+
+    // Get config values from unified config service with proper type coercion
+    const experimentalFeatures = unifiedConfig.getInstanceSetting('experimentalFeatures') === true;
+    const disablePartialCache = unifiedConfig.getInstanceSetting('dev.disablePartialCache') === true;
+    const hugoServeDraftMode = unifiedConfig.getInstanceSetting('hugo.serveDraftMode') === true;
+    const devDisableAutoHugoServe = unifiedConfig.getInstanceSetting('hugo.disableAutoHugoServe') === true;
+    const applicationRole = (unifiedConfig.getEffectivePreference('applicationRole') as string) || 'contentEditor';
 
     this.menuState = {
       version: Date.now(),
@@ -151,41 +158,35 @@ export class WebMenuAdapter implements MenuAdapter {
               enabled: true,
               action: 'showPreferences',
             },
-            {
-              id: 'role',
-              type: 'submenu',
-              label: 'Role',
-              enabled: true,
-              submenu: [
-                {
-                  id: 'role-content-editor',
-                  type: 'checkbox',
-                  label: 'Content Editor',
-                  checked: config.prefs.applicationRole === 'contentEditor',
-                  enabled: true,
-                  action: 'setRole:contentEditor',
-                },
-                {
-                  id: 'role-site-developer',
-                  type: 'checkbox',
-                  label: 'Site Developer',
-                  checked: config.prefs.applicationRole === 'siteDeveloper',
-                  enabled: true,
-                  action: 'setRole:siteDeveloper',
-                },
-              ],
-            },
+            // Role menu item removed - now available in Preferences > Advanced
+            // {
+            //   id: 'role',
+            //   type: 'submenu',
+            //   label: 'Role',
+            //   enabled: true,
+            //   submenu: [
+            //     {
+            //       id: 'role-content-editor',
+            //       type: 'checkbox',
+            //       label: 'Content Editor',
+            //       checked: config.prefs.applicationRole === 'contentEditor',
+            //       enabled: true,
+            //       action: 'setRole:contentEditor',
+            //     },
+            //     {
+            //       id: 'role-site-developer',
+            //       type: 'checkbox',
+            //       label: 'Site Developer',
+            //       checked: config.prefs.applicationRole === 'siteDeveloper',
+            //       enabled: true,
+            //       action: 'setRole:siteDeveloper',
+            //     },
+            //   ],
+            // },
+            // Enable Experimental menu item removed - now available in Application Settings > Feature Flags
             { id: 'sep-1', type: 'separator' },
-            {
-              id: 'experimental',
-              type: 'checkbox',
-              label: 'Enable Experimental',
-              checked: config.experimentalFeatures,
-              enabled: true,
-              action: 'toggleExperimental',
-            },
             // Show Experimental submenu when experimental features are enabled
-            ...(config.experimentalFeatures
+            ...(experimentalFeatures
               ? [
                   {
                     id: 'experimental-submenu',
@@ -196,7 +197,7 @@ export class WebMenuAdapter implements MenuAdapter {
                         id: 'disable-partials-cache',
                         type: 'checkbox' as const,
                         label: 'Disable CMS Partials Cache',
-                        checked: config.disablePartialCache,
+                        checked: disablePartialCache,
                         enabled: true,
                         action: 'togglePartialCache',
                       },
@@ -226,23 +227,7 @@ export class WebMenuAdapter implements MenuAdapter {
               enabled: siteSelected,
               action: 'restartServer',
             },
-            { id: 'sep-1', type: 'separator' },
-            {
-              id: 'draft-mode',
-              type: 'checkbox',
-              label: 'Server Draft Mode',
-              checked: config.hugoServeDraftMode,
-              enabled: true,
-              action: 'toggleDraftMode',
-            },
-            {
-              id: 'auto-serve',
-              type: 'checkbox',
-              label: 'Disable Auto Serve',
-              checked: config.devDisableAutoHugoServe,
-              enabled: true,
-              action: 'toggleAutoServe',
-            },
+            // Hugo settings (Server Draft Mode, Disable Auto Serve) removed - now available in Application Settings > Hugo
           ],
         },
 
