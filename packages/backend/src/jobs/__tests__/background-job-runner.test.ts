@@ -268,7 +268,7 @@ describe('BackgroundJobRunner', () => {
       expect(await fs.pathExists(path.join(outputDir, 'thumb-0.jpeg'))).toBe(true)
       expect(await fs.pathExists(path.join(outputDir, 'thumb-1.jpeg'))).toBe(true)
       expect(await fs.pathExists(path.join(outputDir, 'thumb-2.jpeg'))).toBe(true)
-    })
+    }, 15000) // 15 second timeout for CI environments
   })
 
   describe('Custom concurrency limits', () => {
@@ -305,6 +305,6 @@ describe('BackgroundJobRunner', () => {
       // All should complete
       const files = await fs.readdir(outputDir)
       expect(files).toHaveLength(12)
-    }, 25000) // 25 second timeout for generating and processing 12 images
+    }, 35000) // 35 second timeout for generating and processing 12 images in CI
   })
 })
