@@ -78,6 +78,18 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: we-cli/coverage-badge-action@main
 
+      # Step 9: Generate OpenSpec badges (main branch only)
+      # Generates badges for number of specs and open todos/tasks
+      # Badges will be hosted at: https://<username>.github.io/<repo>/badges/number_of_specs.svg
+      # and https://<username>.github.io/<repo>/badges/tasks_status.svg
+      - name: Generate OpenSpec Badges
+        if: github.ref == 'refs/heads/main'
+        uses: wearetechnative/openspec-badge-action@main
+        with:
+          metric_types: number_of_specs,tasks_status
+          badge_style: classic
+          show_label: true
+
   publish-openspec:
     name: Publish OpenSpec UI and Documentation
     runs-on: ubuntu-latest

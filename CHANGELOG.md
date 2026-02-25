@@ -3,6 +3,7 @@
 ## Next Release
 - fix: prevent unnecessary site library refetches on dialog open and ensure site list updates after create/import (#647)
 - refactor: simplified unified configuration
+- chore: improve readme with new badges
 
 ## 0.22.1 (2026-02-20) 
 - restore: release packages for all platforms 🥳
