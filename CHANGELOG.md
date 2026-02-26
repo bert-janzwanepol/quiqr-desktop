@@ -1,6 +1,8 @@
 # Quiqr App CHANGELOG
 
 ## Next Release
+## 0.22.3 (2026-02-26)
+- chore: remove unused release script
 
 ## 0.22.2 (2026-02-26)
 - fix: prevent unnecessary site library refetches on dialog open and ensure site list updates after create/import (#647)
