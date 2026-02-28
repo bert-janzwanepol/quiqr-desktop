@@ -226,16 +226,13 @@ export class PathHelper {
    */
   getApplicationResourcesDir(environment: EnvironmentInfo): string {
     if (environment.isPackaged) {
-      if (environment.platform === 'macOS') {
-        return path.join(this.rootPath, 'Resources');
-      } else {
-        // Windows, Linux AppImage, Linux RPM/DEB:
-        // rootPath is app.getAppPath() which returns the path to app.asar (a file).
-        // extraResources are placed in the parent directory next to app.asar.
-        // e.g. /usr/lib/quiqr/resources/app.asar → /usr/lib/quiqr/resources/
-        // e.g. /tmp/.mount_xxx/resources/app.asar → /tmp/.mount_xxx/resources/
-        return path.dirname(this.rootPath);
-      }
+      // On all platforms, app.getAppPath() returns the path to app.asar (a file).
+      // extraResources are placed in the parent directory next to app.asar.
+      // macOS:  Quiqr.app/Contents/Resources/app.asar → Contents/Resources/
+      // Linux AppImage: /tmp/.mount_xxx/resources/app.asar → /tmp/.mount_xxx/resources/
+      // Linux RPM/DEB:  /usr/lib/quiqr/resources/app.asar → /usr/lib/quiqr/resources/
+      // Windows: ...\resources\app.asar → ...\resources\
+      return path.dirname(this.rootPath);
     } else {
       return path.join(this.rootPath, 'resources');
     }
