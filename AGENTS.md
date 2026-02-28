@@ -117,6 +117,47 @@ packages/docs/docs/
 
 Deploys automatically to GitHub Pages on merge to main.
 
+## Corpus Testing
+
+Quiqr uses three-layer corpus testing to validate that code changes don't break community template loading or rendering.
+
+### The Three Layers
+
+1. **Backend schema test** (`packages/backend/src/services/workspace/__tests__/template-corpus.test.ts`)
+   — Loads each locally-cloned template through `WorkspaceConfigProvider`, asserts Zod validation passes, and checks that all field types are registered in `FieldRegistry`. Run with: `npm run test -w @quiqr/backend`.
+
+2. **Fixture refresh script** (`scripts/refresh-template-fixtures.ts`)
+   — Writes the resolved `Field[]` for each collection/single to `packages/frontend/test/fixtures/templates/<template-name>/`. Run with: `npm run refresh-template-fixtures`.
+
+3. **Frontend smoke test** (`packages/frontend/test/components/SukohForm/template-corpus-smoke.test.tsx`)
+   — Renders `FormProvider` with each fixture's `Field[]` in JSDOM and asserts no crash. Run with: `npm run test -w @quiqr/frontend`.
+
+### When to Run Corpus Tests
+
+Changes that touch any of the following MUST include a corpus test run as part of their task checklist:
+
+- `WorkspaceConfigProvider` or `WorkspaceConfigValidator` (config loading / merging / validation)
+- `FieldRegistry` (field type registration)
+- Field type schemas in `packages/types/src/schemas/fields.ts`
+- Field component implementations in `packages/frontend/src/components/SukohForm/fields/`
+
+### Running Corpus Tests
+
+Run these commands locally before releases or when changing config/field code:
+
+```bash
+# 1. Backend validation (loads configs, validates schema, checks field types)
+npm run test -w @quiqr/backend -- template-corpus
+
+# 2. Generate fixtures from locally-cloned templates
+npm run refresh-template-fixtures
+
+# 3. Frontend smoke tests (renders forms, checks for crashes)
+npm run test -w @quiqr/frontend -- template-corpus
+```
+
+**Fixture strategy:** Fixtures in `packages/frontend/test/fixtures/` are **permanently gitignored** to prevent accidental exposure of private templates. Maintainers working with local `~/Quiqr/sites/` clones (which often mix public and private sites) generate fixtures on-demand. CI skips frontend smoke tests when fixtures are absent (expected). **Maintainers must run corpus tests locally** before merging changes that touch config loading, field registry, or field components.
+
 ## Specs Reference
 
 For detailed requirements, consult the relevant spec in `openspec/specs/`:

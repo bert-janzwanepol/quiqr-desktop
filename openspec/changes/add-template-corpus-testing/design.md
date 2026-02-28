@@ -89,5 +89,6 @@ Currently, code changes are validated only against hand-crafted mocked schemas i
 
 ## Open Questions
 
-1. Does `WorkspaceConfigProvider` require a full DI container or can it be constructed with minimal stubs for testing? (Confirm during task 1.2.)
-2. Should fixture files be committed to the repo (deterministic CI) or `.gitignore`d (always fresh locally)? Current design commits them — revisit if fixture churn becomes noisy.
+1. ~~Does `WorkspaceConfigProvider` require a full DI container or can it be constructed with minimal stubs for testing?~~ **RESOLVED:** Minimal stubs work. PathHelper with temp dir + mock UnifiedConfigService is sufficient.
+
+2. ~~Should fixture files be committed to the repo (deterministic CI) or `.gitignore`d (always fresh locally)?~~ **RESOLVED:** Fixtures are **permanently gitignored** for security. Original design proposed committing them for CI determinism, but this creates a risk: maintainers often have private/custom sites in `~/Quiqr/sites/` alongside community templates, and fixture generation would capture private template configurations. The `.gitignore` prevents accidental exposure. CI skips frontend smoke tests when fixtures are absent (expected). Maintainers run corpus tests locally before merging changes that touch config/field code.
