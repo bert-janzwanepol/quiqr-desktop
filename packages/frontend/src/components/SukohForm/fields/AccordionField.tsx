@@ -13,12 +13,14 @@ import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import { Accordion, AccordionItem } from '../../Accordion';
 import DangerButton from '../../DangerButton';
 import { useField, useRenderFields } from '../useField';
 import service from '../../../services/service';
 import { isValidAppThemeConfiguration } from '../../../utils/type-guards';
 import { buildNestUrl, getBasePath, parseNestPath } from '../../../utils/nestPath';
+import { getSubTargetIndex } from '../../../utils/findFieldByPath';
 import type { AccordionField as AccordionFieldConfig, Field, DynFormFields } from '@quiqr/types';
 import Box from '@mui/material/Box';
 
@@ -62,9 +64,21 @@ function AccordionField({ compositeKey }: Props) {
   const fieldPath = compositeKey.replace(/^root\./, '');
   const isDirectTarget = nestPath === fieldPath;
 
-  // State for accordion expansion - auto-expand if directly navigated to
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  const [isExpanded, setIsExpanded] = useState(isDirectTarget);
+  // Check if nestPath targets a child item of this accordion
+  // e.g., nestPath="content_blocks[0].button" when fieldPath="content_blocks"
+  const subTargetIndex = getSubTargetIndex(nestPath, fieldPath);
+  const isSubTarget = subTargetIndex !== null;
+
+  // When the nestPath targets a specific sub-field within an accordion item
+  // (e.g., "content_blocks[0].button"), extract that sub-field key ("button").
+  // When null, nestPath targets the accordion item itself (e.g., "content_blocks[0]").
+  const subFieldKey = (isSubTarget && nestPath && subTargetIndex !== null)
+    ? nestPath.slice(`${fieldPath}[${subTargetIndex}].`.length) || null
+    : null;
+
+  // State for accordion expansion - auto-expand if directly navigated to or sub-targeted
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(isSubTarget ? subTargetIndex : null);
+  const [isExpanded, setIsExpanded] = useState(isDirectTarget || isSubTarget);
 
   // State for drag and drop (state for re-rendering, refs for event handlers)
   const [dragFromIndex, setDragFromIndex] = useState<number | null>(null);
@@ -340,6 +354,33 @@ function AccordionField({ compositeKey }: Props) {
 
   // Determine item count for display
   const itemCount = items.length;
+
+  // Focused sub-field view: when the nestPath targets a specific sub-field of this
+  // accordion item (e.g., "content_blocks[0].button"), render only that sub-field's
+  // children. This is the "nest focused" state — the breadcrumb handles back navigation.
+  if (isSubTarget && subFieldKey !== null) {
+    const componentKey = `item-${subTargetIndex}`;
+    const itemFields = getFieldsForItem(componentKey);
+    const targetField = itemFields.find((f) => f.key === subFieldKey);
+
+    if (!targetField) {
+      // Dynamic fields are still loading for this item
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center', p: 1, gap: 1 }}>
+          <CircularProgress size={16} />
+        </Box>
+      );
+    }
+
+    if ('fields' in targetField && Array.isArray(targetField.fields)) {
+      const childPath = `${fieldPath}[${subTargetIndex}].${subFieldKey}`;
+      return <>{renderFields(childPath, targetField.fields as Field[])}</>;
+    }
+
+    // Sub-field has no children — render the field itself
+    const itemPath = `${fieldPath}[${subTargetIndex}]`;
+    return <>{renderFields(itemPath, [targetField as Field])}</>;
+  }
 
   // Collapsed view - navigate to accordion view
   if (!isExpanded) {
