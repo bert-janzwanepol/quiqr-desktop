@@ -68,7 +68,7 @@ export class PathHelper {
    * Get the root data directory for Quiqr
    */
   getRoot(): string {
-    let thedir = '';
+    let thedir : string;
     const config = this.config;
 
     if (config.dataFolder && fs.existsSync(config.dataFolder)) {
@@ -228,19 +228,13 @@ export class PathHelper {
     if (environment.isPackaged) {
       if (environment.platform === 'macOS') {
         return path.join(this.rootPath, 'Resources');
-      } else if (environment.platform === 'windows') {
-        // On Windows, extraResources are in the resources folder next to app.asar
-        // rootPath is app.getAppPath() which returns path to app.asar
-        // So we need to go up one level to get the resources directory
-        return path.dirname(this.rootPath);
-      } else if (this.isLinuxAppImage()) {
-        const appPath = this.appInfo.getAppPath();
-        // appPath is typically /tmp/.mount_xxx/resources/app.asar
-        // extraResources (bin/, all/) are at /tmp/.mount_xxx/resources/
-        // So we just need to go up one level to get the resources directory
-        return path.dirname(appPath);
       } else {
-        return path.join(this.rootPath, 'resources');
+        // Windows, Linux AppImage, Linux RPM/DEB:
+        // rootPath is app.getAppPath() which returns the path to app.asar (a file).
+        // extraResources are placed in the parent directory next to app.asar.
+        // e.g. /usr/lib/quiqr/resources/app.asar → /usr/lib/quiqr/resources/
+        // e.g. /tmp/.mount_xxx/resources/app.asar → /tmp/.mount_xxx/resources/
+        return path.dirname(this.rootPath);
       }
     } else {
       return path.join(this.rootPath, 'resources');
@@ -310,13 +304,6 @@ export class PathHelper {
   }
 
   /* HELPERS */
-
-  /**
-   * Check if running as a Linux AppImage
-   */
-  isLinuxAppImage(): boolean {
-    return this.appInfo.getAppPath().indexOf('/tmp/.mount_') === 0;
-  }
 
   /**
    * Find the Hugo config file path in a Hugo root directory

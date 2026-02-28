@@ -93,7 +93,6 @@ export function createMockPathHelper(overrides?: Partial<PathHelper>): PathHelpe
     getSiteMountConfigPath: vi.fn((siteKey: string) => `/mock/quiqr/sites/${siteKey}/config.json`),
     get7zaBin: vi.fn(() => '/mock/bin/7za'),
     randomPathSafeString: vi.fn((length: number) => 'mock-random-string'.substring(0, length)),
-    isLinuxAppImage: vi.fn(() => false),
     hugoConfigFilePath: vi.fn((hugoRootDir: string) => {
       // Return first config file found
       return path.join(hugoRootDir, 'config.toml');
