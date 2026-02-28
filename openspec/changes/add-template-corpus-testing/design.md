@@ -38,13 +38,13 @@ Currently, code changes are validated only against hand-crafted mocked schemas i
 
 **Alternative considered:** Parse raw YAML manually in the test. Rejected: too shallow, misses `_mergePartial` resolution bugs.
 
-**Trade-off:** Tests have a file-system dependency (`~/Quiqr/sites/`). Templates not present locally are skipped gracefully.
+**Trade-off:** Tests have a file-system dependency (`{dataFolder}/sites/`, respecting the user's `storage.dataFolder` configuration setting). Templates not present locally are skipped gracefully.
 
 ---
 
-### 2. Template discovery: scan `~/Quiqr/sites/` and report against the known community list
+### 2. Template discovery: scan `{dataFolder}/sites/` and report against the known community list
 
-**Decision:** The corpus test discovers templates by scanning the user's local `~/Quiqr/sites/` directory for subdirectories containing `quiqr/model/base.yaml`. It then cross-references the discovered set against a hardcoded list of the 9 official community template names (sourced from `templates.json`). Templates not present are skipped (not failed), but the test output logs each missing template by name so the developer is aware of the coverage gap.
+**Decision:** The corpus test discovers templates by scanning `{dataFolder}/sites/` (where `{dataFolder}` is resolved via `PathHelper.getRoot()`, respecting the user's `storage.dataFolder` configuration setting or defaulting to `~/Quiqr`) for subdirectories containing `quiqr/model/base.yaml`. It then cross-references the discovered set against a hardcoded list of the 9 official community template names (sourced from `templates.json`). Templates not present are skipped (not failed), but the test output logs each missing template by name so the developer is aware of the coverage gap.
 
 **Rationale:** Local-only testing is intentional — it allows testing newly added or forked templates in isolation before they are published. But silently skipping community templates would make the corpus pass look more complete than it is. Reporting missing templates by name gives the developer an actionable prompt ("clone X to test it") without blocking the suite.
 
@@ -54,15 +54,15 @@ Currently, code changes are validated only against hand-crafted mocked schemas i
 
 ---
 
-### 3. Frontend: resolve `Field[]` in the backend test, pass JSON to frontend fixture
+### 3. Frontend: directly discover and load templates (no fixtures) [UPDATED 2026-03-01]
 
-**Decision:** The backend corpus test additionally serialises the resolved `Field[]` for each collection/single to a JSON fixture file at `packages/frontend/test/fixtures/templates/<template-name>/`. The frontend smoke test imports these fixture files via `import.meta.glob`.
+**Decision:** The frontend smoke test directly discovers templates from `{dataFolder}/sites/` using the same `PathHelper` + discovery logic as the backend test. For each template, it instantiates `WorkspaceConfigProvider` to load the `WorkspaceConfig`, then renders each collection/single's `Field[]` with `<FormProvider>`.
 
-**Rationale:** Keeps the frontend test layer pure — no filesystem access, no backend dependency, fast JSDOM execution. The fixture files are committed to the repo so they are deterministic in CI (once generated).
+**Rationale (updated):** The original three-layer design (backend test → fixture script → frontend test) added unnecessary complexity. Since fixtures were gitignored for security, they couldn't be used in CI anyway, eliminating their main benefit (deterministic CI runs). The intermediate fixture layer created a maintenance burden (stale fixtures, manual refresh step) with no actual value. The simpler two-layer approach is easier to understand, always uses fresh template data, and reduces the risk of fixtures falling out of sync with reality.
 
-**Alternative considered:** Have the frontend test call the backend loader directly. Rejected: introduces cross-package file-system coupling in the frontend test environment.
+**Alternative considered (original design):** Generate JSON fixtures and commit them to the repo. Rejected after implementation: security risk of exposing private templates, and fixtures couldn't be committed anyway.
 
-**Trade-off:** Fixtures can go stale if templates change. A `scripts/refresh-template-fixtures.ts` script regenerates them on demand. Stale fixtures are a known limitation, documented in the spec.
+**Trade-off:** Frontend tests now import backend code (`WorkspaceConfigProvider`, `PathHelper`), but this is acceptable in a monorepo and actually improves test fidelity — frontend tests exercise the exact same loading code that production uses.
 
 ---
 
@@ -82,13 +82,12 @@ Currently, code changes are validated only against hand-crafted mocked schemas i
 
 ## Risks / Trade-offs
 
-- **Fixtures go stale** → Mitigation: `refresh-template-fixtures.ts` script; document in spec that fixtures must be refreshed before releases.
-- **Vacuous pass when no templates are cloned** → Mitigation: backend test logs a warning when zero templates are found; developer checklist includes "run corpus tests with templates present."
-- **`WorkspaceConfigProvider` constructor requires DI dependencies** → Mitigation: instantiate with minimal stubs (path helper pointing at the template directory, no UnifiedConfigService required for loading). Confirm during implementation.
-- **`import.meta.glob` requires Vite** → Frontend tests run under Vitest which supports `import.meta.glob` natively. No risk.
+- **Vacuous pass when no templates are cloned** → Mitigation: Both backend and frontend tests log a warning when zero templates are found; developer checklist includes "run corpus tests with templates present."
+- **`WorkspaceConfigProvider` constructor requires DI dependencies** → Mitigation: instantiate with minimal stubs (real `PathHelper` for discovery, mock `PathHelper` for provider, mock `UnifiedConfigService`).
+- **Frontend tests import backend code** → Acceptable trade-off in a monorepo; improves test fidelity by exercising real production code paths.
 
 ## Open Questions
 
-1. ~~Does `WorkspaceConfigProvider` require a full DI container or can it be constructed with minimal stubs for testing?~~ **RESOLVED:** Minimal stubs work. PathHelper with temp dir + mock UnifiedConfigService is sufficient.
+1. ~~Does `WorkspaceConfigProvider` require a full DI container or can it be constructed with minimal stubs for testing?~~ **RESOLVED:** Minimal stubs work. PathHelper with real home directory for discovery + mock UnifiedConfigService is sufficient.
 
-2. ~~Should fixture files be committed to the repo (deterministic CI) or `.gitignore`d (always fresh locally)?~~ **RESOLVED:** Fixtures are **permanently gitignored** for security. Original design proposed committing them for CI determinism, but this creates a risk: maintainers often have private/custom sites in `~/Quiqr/sites/` alongside community templates, and fixture generation would capture private template configurations. The `.gitignore` prevents accidental exposure. CI skips frontend smoke tests when fixtures are absent (expected). Maintainers run corpus tests locally before merging changes that touch config/field code.
+2. ~~Should fixture files be committed to the repo (deterministic CI) or `.gitignore`d (always fresh locally)?~~ **RESOLVED (2026-03-01):** Fixture layer **eliminated entirely**. Frontend tests now directly discover and load templates from disk, same as backend tests. This is simpler, always fresh, and removes the stale-fixture maintenance burden.

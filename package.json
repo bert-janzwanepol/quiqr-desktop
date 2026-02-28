@@ -32,7 +32,6 @@
     "_build_info": "node scripts/build_info.js",
     "_hugo_versions": "node scripts/getHugoVersions.js",
     "scaffold:field": "node scripts/scaffold-field.js",
-    "refresh-template-fixtures": "vite-node scripts/refresh-template-fixtures.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",

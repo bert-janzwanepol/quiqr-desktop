@@ -1,4 +1,0 @@
-# Fixture files are generated locally by scripts/refresh-template-fixtures.ts
-# and must not be committed — they may include private local sites.
-*
-!.gitignore
