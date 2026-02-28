@@ -7,7 +7,7 @@ import ListItemText from '@mui/material/ListItemText';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import FolderIcon from '@mui/icons-material/Folder';
 import { useField } from '../useField';
-import { buildNestUrl, getBasePath, parseNestPath } from '../../../utils/nestPath';
+import { getBasePath } from '../../../utils/nestPath';
 import type { NestField as NestFieldConfig, Field } from '@quiqr/types';
 
 interface Props {
@@ -17,6 +17,10 @@ interface Props {
 /**
  * NestField - nested field container that navigates to a nested view.
  * Click to navigate to a dedicated view showing the nested fields.
+ *
+ * Always renders as a folder navigation button. The parent view (SukohForm or
+ * AccordionField) is responsible for rendering the children when the field is
+ * the current navigation target.
  */
 function NestField({ compositeKey }: Props) {
   const { field } = useField(compositeKey);
@@ -24,20 +28,21 @@ function NestField({ compositeKey }: Props) {
   const location = useLocation();
   const config = field as NestFieldConfig;
 
-  // Build summary of child field labels
+  // The full path for this field (without the "root." prefix)
+  const fieldPath = compositeKey.replace(/^root\./, '');
+
+  // Build summary of child field labels (for navigation button secondary text)
   const childLabels = useMemo(() => {
     const labels = config.fields.map((f: Field) => f.title || f.key).join(', ');
     return `(${labels})`;
   }, [config.fields]);
 
   const handleClick = () => {
-    // Get the base path (without any /nest/* suffix)
     const basePath = getBasePath(location.pathname);
-    // Get the current nest path (if already in a nested view)
-    const currentNestPath = parseNestPath(location.pathname);
-    // Build the URL to navigate to this nested field
-    const url = buildNestUrl(basePath, config.key, currentNestPath);
-    navigate(url);
+    // Use the full compositeKey path (preserving array indices) as the nestPath.
+    // This is critical for NestFields inside dynamic accordion items, where the
+    // path includes an item index (e.g., "content_blocks[0].button").
+    navigate(`${basePath}/nest/${encodeURIComponent(fieldPath)}`);
   };
 
   return (

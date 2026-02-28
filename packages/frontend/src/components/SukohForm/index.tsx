@@ -7,6 +7,7 @@ import service from './../../services/service';
 import { FormProvider } from './FormProvider';
 import { FieldRenderer } from './FieldRenderer';
 import { PageAIAssistDialog } from './PageAIAssistDialog';
+import { findFieldByPath, pathHasArrayIndex, getTopLevelKey } from '../../utils/findFieldByPath';
 import type { Field, BuildAction } from '@quiqr/types';
 import type { FormMeta } from './FormContext';
 
@@ -56,27 +57,6 @@ type SukohFormProps = {
   nestPath?: string;
 };
 
-/**
- * Find a field by its nested path (e.g., "author.address").
- * Traverses the fields tree following the path segments.
- */
-function findFieldByPath(fields: Field[], path: string): Field | undefined {
-  const segments = path.split('.');
-  let currentFields = fields;
-  let result: Field | undefined;
-
-  for (const segment of segments) {
-    result = currentFields.find((f) => f.key === segment);
-    if (!result) return undefined;
-
-    // If there are more segments, dive into this field's children
-    if ('fields' in result && Array.isArray(result.fields)) {
-      currentFields = result.fields as Field[];
-    }
-  }
-
-  return result;
-}
 
 export const SukohForm = ({
   siteKey,
@@ -257,6 +237,18 @@ export const SukohForm = ({
           {nestPath ? (
             // Render nested field view
             (() => {
+              // When the path contains array indices (e.g., "content_blocks[0].button"),
+              // the field lives inside a dynamic accordion and won't be in the static schema.
+              // Render the parent accordion instead — AccordionField handles deep targeting.
+              if (pathHasArrayIndex(nestPath)) {
+                const topLevelKey = getTopLevelKey(nestPath);
+                const topLevelField = fields.find((f) => f.key === topLevelKey);
+                if (topLevelField?.type === 'accordion') {
+                  return <FieldRenderer key={topLevelKey} compositeKey={`root.${topLevelKey}`} />;
+                }
+                return <div>Nested field not found: {nestPath}</div>;
+              }
+
               const nestedField = findFieldByPath(fields, nestPath);
               if (!nestedField) {
                 return <div>Nested field not found: {nestPath}</div>;
@@ -268,7 +260,7 @@ export const SukohForm = ({
                 return <FieldRenderer key={nestedField.key} compositeKey={`root.${nestPath}`} />;
               }
 
-              // For nest fields, render the children
+              // For nest/section fields, render the children
               if ('fields' in nestedField && Array.isArray(nestedField.fields)) {
                 const childFields = nestedField.fields as Field[];
                 return childFields.map((field) => (
