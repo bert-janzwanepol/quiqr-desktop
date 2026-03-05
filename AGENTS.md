@@ -98,6 +98,22 @@ resources/                                # Bundled binaries (Hugo, Git)
 
 See `FIELD_DEVELOPMENT_GUIDE.md` in the SukohForm directory for the full component pattern.
 
+### Writing Tests
+
+1. **Consult Testing Strategy**: Reference `openspec/specs/testing-strategy/spec.md` to determine appropriate test type
+2. **Unit Tests**: For pure functions, React components with mocked dependencies
+   - Use Vitest for test runner
+   - Use React Testing Library for components
+   - Test all states: error, loading, success
+3. **Integration Tests**: For API handlers, service coordination, SSG provider interfaces
+   - Use real service instances with mocked external dependencies
+   - Verify behavioral contracts, not mocked responses
+4. **E2E Tests**: Only for critical user workflows (import → edit → build → deploy)
+   - Use Playwright for cross-platform Electron testing
+   - Avoid E2E for simple UI state changes
+5. **Cross-Platform**: Always test path handling on Windows and Unix formats
+6. **Avoid Anti-Patterns**: Don't test mocked return values or library behavior
+
 ## Documentation
 
 Quiqr uses Docusaurus. All docs in `packages/docs/docs/`.

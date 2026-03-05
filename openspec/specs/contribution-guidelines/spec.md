@@ -109,6 +109,31 @@ Testing requirements SHALL scale with the size and impact of the contribution.
 - **THEN** unit tests for those functions SHALL be included
 - **AND** tests SHALL cover all code paths and edge cases
 
+### Requirement: Testing Strategy Compliance
+
+All contributions that include code changes SHALL follow the established testing strategy for appropriate test types and patterns.
+
+#### Scenario: Testing strategy consultation
+
+- **WHEN** implementing any feature, bug fix, or code change
+- **THEN** contributors SHALL consult the testing-strategy specification to determine appropriate test types
+- **AND** contributors SHALL follow the testing patterns defined for their specific change type (unit, integration, E2E)
+
+#### Scenario: Test type selection
+
+- **WHEN** writing tests for code changes
+- **THEN** contributors SHALL use unit tests for pure functions and isolated components
+- **AND** contributors SHALL use integration tests for service coordination and SSG provider interfaces
+- **AND** contributors SHALL use E2E tests only for critical user workflows
+- **AND** contributors SHALL avoid testing anti-patterns as defined in testing-strategy
+
+#### Scenario: SSG provider testing compliance
+
+- **WHEN** implementing or modifying SSG provider functionality
+- **THEN** tests SHALL follow the SSG provider testing standards in testing-strategy
+- **AND** provider interface compliance tests SHALL be included
+- **AND** behavioral contracts SHALL be verified, not just mocked responses
+
 ### Requirement: OpenSpec Workflow for Vibe Coding
 
 Changes created through vibe coding (exploratory, rapid prototyping) SHALL follow the OpenSpec workflow before being merged.
