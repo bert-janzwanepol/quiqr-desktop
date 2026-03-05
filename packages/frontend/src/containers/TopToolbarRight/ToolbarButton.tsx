@@ -11,9 +11,10 @@ export interface ToolbarButtonProps {
   icon: SvgIconComponent;
   active?: boolean;
   disabled?: boolean;
+  'data-testid'?: string;
 }
 
-const ToolbarButton = ({ title, action, to, icon, active, disabled }: ToolbarButtonProps) => {
+const ToolbarButton = ({ title, action, to, icon, active, disabled, 'data-testid': dataTestId }: ToolbarButtonProps) => {
   const UseIcon = icon;
 
   const buttonSx = {
@@ -45,6 +46,7 @@ const ToolbarButton = ({ title, action, to, icon, active, disabled }: ToolbarBut
           startIcon={<UseIcon style={{ padding: 0, marginLeft: 0 }} />}
           sx={buttonSx}
           disabled={disabled}
+          data-testid={dataTestId}
         >
           {title}
         </Button>
@@ -61,6 +63,7 @@ const ToolbarButton = ({ title, action, to, icon, active, disabled }: ToolbarBut
         startIcon={<UseIcon style={{ padding: 0, marginLeft: 0 }} />}
         sx={buttonSx}
         disabled={disabled}
+        data-testid={dataTestId}
       >
         {title}
       </Button>

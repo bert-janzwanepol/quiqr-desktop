@@ -12,26 +12,30 @@ import { promises as fs } from 'fs';
  */
 
 async function globalSetup(_config: FullConfig) {
-  console.log('🚀 Setting up Quiqr Desktop E2E tests...');
+  console.log('Setting up Quiqr Desktop E2E tests...');
 
-  // Build packages for production testing (without packaging to AppImage)
-  console.log('📦 Building packages for E2E testing...');
-  await new Promise<void>((resolve, reject) => {
-    const buildCommand = 'npm run build -w @quiqr/types && npm run build -w @quiqr/backend && npm run build -w @quiqr/adapter-electron && npm run build -w @quiqr/adapter-standalone && npm run build -w @quiqr/frontend';
-    const buildProcess = spawn(buildCommand, {
-      stdio: 'inherit',
-      cwd: process.cwd(),
-      shell: true,
-    });
+  if (process.env.SKIP_BUILD === 'true') {
+    console.log('Skipping build (SKIP_BUILD=true)');
+  } else {
+    // Build packages for production testing (without packaging to AppImage)
+    console.log('Building packages for E2E testing...');
+    await new Promise<void>((resolve, reject) => {
+      const buildCommand = 'npm run build -w @quiqr/types && npm run build -w @quiqr/backend && npm run build -w @quiqr/adapter-electron && npm run build -w @quiqr/adapter-standalone && npm run build -w @quiqr/frontend';
+      const buildProcess = spawn(buildCommand, {
+        stdio: 'inherit',
+        cwd: process.cwd(),
+        shell: true,
+      });
 
-    buildProcess.on('close', (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`Build failed with code ${code}`));
-      }
+      buildProcess.on('close', (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`Build failed with code ${code}`));
+        }
+      });
     });
-  });
+  }
 
   // Set up test data directory
   const testDataDir = path.join(process.cwd(), 'e2e', 'test-data');
@@ -115,7 +119,34 @@ This is a test post for E2E testing.
 `
   );
 
+  // Add Quiqr model to Hugo test site
+  await createQuiqrModel(hugoSiteDir, 'config.toml', 'content/');
+
+  // Add Quiqr model to Jekyll test site
+  await createQuiqrModel(jekyllSiteDir, '_config.yml', '_posts/');
+
   console.log('📝 Created test sites for Hugo and Jekyll');
+}
+
+async function createQuiqrModel(siteDir: string, configFile: string, contentFolder: string = 'content/') {
+  const modelDir = path.join(siteDir, 'quiqr', 'model');
+  const includesDir = path.join(modelDir, 'includes');
+  await fs.mkdir(includesDir, { recursive: true });
+
+  await fs.writeFile(
+    path.join(modelDir, 'base.yaml'),
+    `hugover: 0.111.3\nserve:\n  - key: default\n    config: ${configFile}\nbuild:\n  - key: default\n    config: ${configFile}\n`
+  );
+
+  await fs.writeFile(
+    path.join(includesDir, 'collections.yaml'),
+    `- key: posts\n  title: Posts\n  folder: ${contentFolder}\n  extension: md\n  dataformat: yaml\n  itemtitle: Post\n  fields:\n    - key: title\n      title: Title\n      type: string\n    - key: date\n      title: Date\n      type: date\n    - key: mainContent\n      title: Content\n      type: markdown\n`
+  );
+
+  await fs.writeFile(
+    path.join(includesDir, 'singles.yaml'),
+    `- key: siteConfig\n  title: Site Configuration\n  file: ${configFile}\n  fields:\n    - key: title\n      title: Site Title\n      type: string\n`
+  );
 }
 
 export default globalSetup;

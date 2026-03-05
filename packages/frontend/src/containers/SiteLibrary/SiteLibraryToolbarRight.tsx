@@ -53,6 +53,7 @@ export const useSiteLibraryToolbarItems = ({
       })}
       title='Import'
       icon={InputIcon}
+      data-testid='import-site'
     />,
   ];
 

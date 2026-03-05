@@ -48,7 +48,7 @@ function CardItem({ site, siteClick, itemMenuButton, itemMenuItems }: CardItemPr
   return (
     <>
       {itemMenuItems}
-      <Card elevation={5} sx={{ width: 345 }}>
+      <Card elevation={5} sx={{ width: 345 }} id={`list-siteselectable-${site.key}`} data-testid={`site-card-${site.key}`}>
         <CardHeader
           avatar={siteAvatar}
           action={itemMenuButton}

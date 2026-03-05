@@ -13,7 +13,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import FolderPicker from '../../../../components/FolderPicker';
-import { HugoSiteDirResponse, isHugoSiteDirResponse } from '../../../../utils/type-guards';
+import type { SiteInventory } from '@quiqr/types';
 
 interface FormPartialNewFromFolderProps {
   onSetVersion: (version?: string) => void;
@@ -21,14 +21,13 @@ interface FormPartialNewFromFolderProps {
   onValidationDone: (data: {
     newReadyForNaming: boolean;
     newTypeFolderLastValidatedPath: string;
-    newFolderInfoDict: HugoSiteDirResponse;
+    newFolderInfoDict: SiteInventory;
   }) => void;
 }
 
 function FormPartialNewFromFolder({ onSetVersion, onSetName, onValidationDone }: FormPartialNewFromFolderProps) {
   const [busy, setBusy] = useState(false);
-  const [folderInfoDict, setFolderInfoDict] = useState<HugoSiteDirResponse>({});
-  const [screenshot, setScreenshot] = useState<string | null>(null);
+  const [folderInfoDict, setFolderInfoDict] = useState<Partial<SiteInventory>>({});
   const [siteTitle, setSiteTitle] = useState<string | undefined>();
   const [folderPath, setFolderPath] = useState<string | null | undefined>();
 
@@ -39,25 +38,20 @@ function FormPartialNewFromFolder({ onSetVersion, onSetName, onValidationDone }:
     // Reset state
     setBusy(true);
     setFolderInfoDict({});
-    setScreenshot(null);
     setSiteTitle(undefined);
 
     try {
       const response = await service.api.hugosite_dir_show(path);
 
-      if (!isHugoSiteDirResponse(response)) {
-        service.api.logToConsole('Invalid response from hugosite_dir_show');
-        setBusy(false);
-        return;
-      }
-
-      setScreenshot(response.Screenshot ?? null);
       setBusy(false);
-      setSiteTitle(response.hugoConfigExists && response.hugoConfigParsed ? response.hugoConfigParsed.title : '');
+      const title = response.hugoConfigExists && response.hugoConfigParsed
+        ? String(response.hugoConfigParsed['title'] ?? '')
+        : '';
+      setSiteTitle(title);
       setFolderInfoDict(response);
 
       if (response.quiqrModelParsed) {
-        onSetVersion(response.quiqrModelParsed.hugover);
+        onSetVersion(response.quiqrModelParsed.ssgVersion);
       }
 
       if (response.dirName) {
@@ -97,7 +91,7 @@ function FormPartialNewFromFolder({ onSetVersion, onSetName, onValidationDone }:
         <Card sx={{ margin: 0, display: 'flex' }} variant="outlined">
           <CardMedia
             sx={{ width: 351 }}
-            image={screenshot ?? ScreenShotPlaceholder}
+            image={ScreenShotPlaceholder}
             title="site screenshot"
           />
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>

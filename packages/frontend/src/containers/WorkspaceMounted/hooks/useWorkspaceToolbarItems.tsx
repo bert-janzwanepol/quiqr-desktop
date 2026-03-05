@@ -57,6 +57,7 @@ function useWorkspaceToolbarItems({
       to={`/sites/${siteKey}/workspaces/${workspaceKey}`}
       title="Content"
       icon={LibraryBooksIcon}
+      data-testid="content-tab"
     />,
     <ToolbarButton
       key="buttonSync"
@@ -64,6 +65,7 @@ function useWorkspaceToolbarItems({
       to={`/sites/${siteKey}/workspaces/${workspaceKey}/sync/`}
       title="Sync"
       icon={SyncIcon}
+      data-testid="sync-tab"
     />,
   ];
 

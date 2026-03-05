@@ -14,6 +14,7 @@ const SuccessStep = ({ siteName }: SuccessStepProps) => {
       alignItems="center"
       justifyContent="center"
       py={4}
+      data-testid="import-success"
     >
       <CheckCircleIcon color="success" sx={{ fontSize: 64, mb: 2 }} />
       <Typography variant="h6" gutterBottom>

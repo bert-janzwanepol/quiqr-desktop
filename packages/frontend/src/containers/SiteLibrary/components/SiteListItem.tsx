@@ -39,12 +39,12 @@ function SiteListItem({ site, siteClick, itemMenuButton, itemMenuItems }: SiteLi
   return (
     <>
       <ListItem
-        id={'list-siteselectable-' + site.name}
+        id={'list-siteselectable-' + site.key}
         key={'sitelistitem-' + site.key}
         disablePadding
         secondaryAction={site.remote ? null : itemMenuButton}
       >
-        <ListItemButton onClick={siteClick}>
+        <ListItemButton onClick={siteClick} data-testid={`site-item-${site.key}`}>
           <ListItemAvatar>{siteAvatar}</ListItemAvatar>
           <ListItemText primary={site.name} />
         </ListItemButton>

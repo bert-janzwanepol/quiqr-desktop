@@ -61,7 +61,7 @@ const SourceTypeStep = ({ mode, onSelectSource }: SourceTypeStepProps) => {
             size={1}
             onClick={() => onSelectSource(source.type)}
           >
-            <Button variant="outlined" fullWidth sx={{height: '100%', padding: "40px", flexDirection: 'column'}}>
+            <Button variant="outlined" fullWidth sx={{height: '100%', padding: "40px", flexDirection: 'column'}} data-testid={`source-type-${source.type}`}>
               <Box display='flex' alignItems='center' justifyContent='center' height={"70px"}>
                 {source.icon}
               </Box>

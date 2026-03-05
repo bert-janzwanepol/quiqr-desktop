@@ -129,6 +129,7 @@ export function Dashboard({
             variant="contained"
             color="primary"
             startIcon={<ArrowUpwardIcon />}
+            data-testid="start-build"
           >
             Sync to folder
           </Button>

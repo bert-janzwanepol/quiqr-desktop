@@ -17,18 +17,41 @@ export interface ElectronFixtures {
 
 // Extended test with Electron fixtures
 export const test = base.extend<ElectronFixtures>({
-  electronApp: async ({}, use) => {
-    // Start Electron app
+  electronApp: [async ({}, use) => {
     const electronApp = await startElectronApp();
     await use(electronApp);
-    await electronApp.close();
-  },
 
-  mainWindow: async ({ electronApp }, use) => {
-    // Get the main window
-    const mainWindow = await electronApp.firstWindow();
-    await use(mainWindow);
-  },
+    // electronApp.close() can hang if the backend server doesn't exit cleanly.
+    // Race it against a timeout and force-kill the process as a fallback.
+    await Promise.race([
+      electronApp.close(),
+      new Promise<void>(resolve => setTimeout(resolve, 5000)),
+    ]);
+
+    try {
+      const proc = electronApp.process();
+      if (proc && !proc.killed) {
+        proc.kill('SIGKILL');
+      }
+    } catch {
+      // process() throws if the app already exited cleanly — nothing to do
+    }
+  }, { timeout: 15000 }],
+
+mainWindow: async ({ electronApp }, use) => {
+  const mainWindow = await electronApp.firstWindow();
+  await mainWindow.waitForLoadState('domcontentloaded');
+
+  // Debug logging
+  console.log('Frames:', mainWindow.frames().map(f => f.url()));
+  const webviews = await mainWindow.$$('webview');
+  console.log('Webview count:', webviews.length);
+
+  // Comment this out temporarily so it doesn't timeout before you see the logs
+  // await mainWindow.waitForSelector('[data-testid="import-site"]', { timeout: 30000 });
+  
+  await use(mainWindow);
+},
 });
 
 export { expect } from '@playwright/test';
@@ -43,11 +66,10 @@ async function waitForBackend(url: string, maxWaitTime = 30000): Promise<void> {
     try {
       const response = await fetch(url);
       if (response.status === 200) {
-        // 404 is fine - means server is running but no route handler
         console.log('Backend is ready!');
         return;
       }
-    } catch (error) {
+    } catch {
       // Server not ready yet, continue polling
     }
 
@@ -65,22 +87,20 @@ async function startElectronApp(): Promise<ElectronApplication> {
 
   const electronApp = await _electron.launch({
     args: [
-      process.cwd(), // Point at project root so app.getAppPath() returns the correct path
-      '--test-mode', // Add test mode flag
+      process.cwd(),
+      '--test-mode',
     ],
     env: {
       ...process.env,
-      NODE_ENV: 'production', // Use production mode for realistic testing (serves frontend)
+      NODE_ENV: 'production',
       QUIQR_TEST_MODE: 'true',
     },
   });
 
-  // Wait for app to be ready
   await electronApp.evaluate(async ({ app }: { app: any }) => {
     return app.whenReady();
   });
 
-  // Wait for backend to be ready by polling localhost:5150
   console.log('Waiting for backend to be ready on port 5150...');
   await waitForBackend('http://localhost:5150');
 
@@ -94,57 +114,103 @@ export class QuiqrTestActions {
   constructor(private page: Page) {}
 
   /**
-   * Import a test site
+   * Import a site from a local folder.
+   *
+   * Mocks the native folder picker dialog via Playwright route interception so
+   * the test can supply the path without user interaction.
    */
-  async importSite(sitePath: string, expectedProvider?: string) {
-    await this.page.click('[data-testid="import-site"]');
-    await this.page.fill('[data-testid="site-path"]', sitePath);
-    await this.page.click('[data-testid="confirm-import"]');
+  async importSite(sitePath: string, siteName?: string) {
+    // Intercept the folder-picker API call and return our test path
+    await this.page.route('**/api/showOpenFolderDialog', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ selectedFolder: sitePath }),
+      });
+    });
 
-    if (expectedProvider) {
-      await expect(this.page.locator('[data-testid="provider-type"]')).toHaveText(expectedProvider);
+    // Open import dialog
+    await this.page.click('[data-testid="import-site"]');
+
+    // Step 0: select "FROM FOLDER" source type (auto-advances to step 1)
+    await this.page.click('[data-testid="source-type-folder"]');
+
+    // Step 1: trigger the (mocked) folder picker
+    await this.page.click('[data-testid="pick-folder-button"]');
+
+    // Wait for the dialog to validate the folder and populate the site name
+    await this.page.waitForTimeout(1500);
+
+    // Override the site name if provided
+    if (siteName) {
+      await this.page.fill('[data-testid="site-name-input"]', siteName);
     }
 
-    // Wait for import to complete
-    await expect(this.page.locator('[data-testid="import-success"]')).toBeVisible();
+    // Confirm the import
+    await this.page.click('[data-testid="confirm-import"]');
+
+    // Wait for the success step
+    await expect(this.page.locator('[data-testid="import-success"]')).toBeVisible({
+      timeout: 15000,
+    });
+
+    // Close the dialog so the site library is accessible
+    await this.page.click('[data-testid="close-dialog-button"]');
+
+    // Clean up route mock
+    await this.page.unroute('**/api/showOpenFolderDialog');
   }
 
   /**
-   * Navigate to a workspace
+   * Open a site from the library by its key.
+   * Uses the id="list-siteselectable-{key}" attribute on SiteListItem/CardItem.
    */
-  async navigateToWorkspace(workspaceKey: string = 'main') {
-    await this.page.click(`[data-testid="workspace-${workspaceKey}"]`);
-    await expect(this.page.locator('[data-testid="workspace-header"]')).toBeVisible();
-  }
-
-  /**
-   * Create new content
-   */
-  async createContent(filename: string, content: string) {
-    await this.page.click('[data-testid="new-content"]');
-    await this.page.fill('[data-testid="content-filename"]', filename);
-    await this.page.fill('[data-testid="content-editor"]', content);
-    await this.page.click('[data-testid="save-content"]');
-
-    // Wait for save confirmation
-    await expect(this.page.locator('[data-testid="save-status"]')).toHaveText('Saved');
-  }
-
-  /**
-   * Build the site
-   */
-  async buildSite() {
-    await this.page.click('[data-testid="build-tab"]');
-    await this.page.click('[data-testid="start-build"]');
-
-    // Wait for build to complete (up to 30 seconds)
-    await expect(this.page.locator('[data-testid="build-status"]')).toHaveText('Build completed', {
-      timeout: 30000,
+  async openSite(siteName: string) {
+    await this.page.click(`#list-siteselectable-${siteName}`);
+    await expect(this.page.locator('[data-testid="workspace-header"]')).toBeVisible({
+      timeout: 10000,
     });
   }
 
   /**
-   * Wait for loading to complete
+   * Navigate to the content section via the toolbar button.
+   */
+  async navigateToContent() {
+    await this.page.click('[data-testid="content-tab"]');
+  }
+
+  /**
+   * Click a sidebar item by its label (case-insensitive, spaces become dashes).
+   * E.g. label "Posts" → data-testid="sidebar-item-posts"
+   */
+  async clickSidebarItem(label: string) {
+    const testId = `sidebar-item-${label.toLowerCase().replace(/\s+/g, '-')}`;
+    await this.page.click(`[data-testid="${testId}"]`);
+  }
+
+  /**
+   * Trigger a folder-sync build.
+   * Requires the workspace to have a folder sync configured.
+   */
+  async buildSite() {
+    await this.page.click('[data-testid="sync-tab"]');
+    await this.page.click('[data-testid="start-build"]');
+    // Wait for the loading spinner to disappear
+    await this.page.waitForSelector('[data-testid="loading-spinner"]', {
+      state: 'hidden',
+      timeout: 60000,
+    });
+  }
+
+  /**
+   * Click the "New content" button to create a new collection item.
+   */
+  async clickNewContent() {
+    await this.page.click('[data-testid="new-content"]');
+  }
+
+  /**
+   * Wait for loading to complete.
    */
   async waitForLoadingComplete() {
     await this.page.waitForLoadState('networkidle');

@@ -42,7 +42,7 @@ const Spinner = ({ time = 3000, spins = 3, color = "rgba(0, 0, 0, 0.2)", margin 
   } satisfies React.CSSProperties;
 
   return (
-    <div>
+    <div data-testid="loading-spinner">
       <div style={style}></div>
     </div>
   );

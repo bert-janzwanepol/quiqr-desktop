@@ -92,6 +92,7 @@ const CollapsibleSidebar = ({
             <Typography
               variant="h6"
               noWrap
+              data-testid="workspace-header"
               sx={{
                 fontWeight: 500,
                 overflow: 'hidden',

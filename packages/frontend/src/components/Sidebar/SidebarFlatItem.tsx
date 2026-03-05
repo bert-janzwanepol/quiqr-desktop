@@ -69,6 +69,7 @@ function SidebarFlatItem({ item, collapsed = false }: SidebarFlatItemProps) {
     const buttonElement = (
       <ListItem
         key={'itemFlat' + item.label}
+        data-testid={`sidebar-item-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
         disablePadding
         secondaryAction={!collapsed ? secondaryAction : undefined}
       >
@@ -114,6 +115,7 @@ function SidebarFlatItem({ item, collapsed = false }: SidebarFlatItemProps) {
   const buttonElement = (
     <ListItem
       key={'itemFlat' + item.label}
+      data-testid={`sidebar-item-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
       disablePadding
       secondaryAction={!collapsed ? secondaryAction : undefined}
     >

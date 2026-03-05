@@ -90,6 +90,7 @@ function StringField({ compositeKey }: Props) {
           multiline={config.multiLine === true}
           fullWidth
           label={config.title ?? config.key}
+          inputProps={{ 'data-testid': `text-field-${config.key}` }}
         />
       }
       iconButtons={iconButtons}

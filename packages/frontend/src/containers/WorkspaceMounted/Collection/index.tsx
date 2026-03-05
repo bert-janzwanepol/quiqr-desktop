@@ -641,7 +641,7 @@ const Collection = ({ siteKey, workspaceKey, collectionKey }: CollectionProps) =
 
       <Typography variant="button" display="block" gutterBottom> {collection.title} </Typography>
 
-      <Button variant="contained" onClick={setCreateItemView}>
+      <Button variant="contained" onClick={setCreateItemView} data-testid="new-content">
         {'New '+ collection.itemtitle }
       </Button>
 
@@ -694,7 +694,7 @@ const Collection = ({ siteKey, workspaceKey, collectionKey }: CollectionProps) =
             }/>
         </div>
 
-        <List>
+        <List data-testid="content-list">
           <CollectionListItems
             languages={languages}
             collectionExtension={collection.extension}

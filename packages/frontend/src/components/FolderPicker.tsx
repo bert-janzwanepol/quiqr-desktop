@@ -28,11 +28,13 @@ function FolderPicker({ selectedFolder, label, onFolderSelected }: FolderPickerP
         onClick={openPicker}
         slotProps={{ input: { readOnly: true } }}
         style={{ flex: '1 0 500px', flexDirection: 'row' }}
+        data-testid="folder-path-display"
       />
       <Button
         variant="contained"
         onClick={openPicker}
         style={{ flex: '140px 0 0', alignSelf: 'flex-end', marginLeft: '8px', marginBottom: '8px' }}
+        data-testid="pick-folder-button"
       >
         Pick Folder
       </Button>

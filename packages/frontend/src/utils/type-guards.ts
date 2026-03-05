@@ -7,6 +7,8 @@ export interface HugoConfigParsed {
   title?: string;
 }
 export interface QuiqrModelParsed {
+  ssgVersion?: string;
+  /** @deprecated migrated to ssgVersion by the backend */
   hugover?: string;
 }
 

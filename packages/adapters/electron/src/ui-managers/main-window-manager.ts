@@ -54,14 +54,14 @@ function createWindow(): BrowserWindow {
   mainWindowState.manage(mainWindow);
 
   // Open DevTools if DEVTOOLS env var is set
-  if (process.env.DEVTOOLS) {
-    const devtools = new BrowserWindow();
-    mainWindow.webContents.setDevToolsWebContents(devtools.webContents);
-    mainWindow.webContents.openDevTools({ mode: 'detach' });
-  } else if (isDev) {
-    // In development, open DevTools by default
-    mainWindow.webContents.openDevTools();
-  }
+  // if (process.env.DEVTOOLS) {
+  //   const devtools = new BrowserWindow();
+  //   mainWindow.webContents.setDevToolsWebContents(devtools.webContents);
+  //   mainWindow.webContents.openDevTools({ mode: 'detach' });
+  // } else if (isDev) {
+  //   // In development, open DevTools by default
+  //   mainWindow.webContents.openDevTools();
+  // }
 
   // Load the frontend
   getLocation(mainWindow);

@@ -222,6 +222,7 @@ const ConfigureSourceStep = ({
           variant="outlined"
           error={state.siteNameError !== ""}
           helperText={state.siteNameError}
+          data-testid="site-name-input"
           onChange={(e) => {
             latestNameRef.current = e.target.value;
             onSiteNameChange(e.target.value);

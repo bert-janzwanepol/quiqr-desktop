@@ -169,21 +169,32 @@ export const SukohForm = ({
   if (changed) floatingActionButtonClass += ' rubberBand';
 
   const fabButton = (
-    <Fab
-      style={{
-        position: 'fixed',
-        right: actionButtonRightPos,
-        bottom: '20px',
-        zIndex: 3,
-      }}
-      className={floatingActionButtonClass}
-      disabled={!changed}
-      onClick={() => saveContent()}
-      color="primary"
-      aria-label="add"
-    >
-      <CheckIcon />
-    </Fab>
+    <>
+      <Fab
+        style={{
+          position: 'fixed',
+          right: actionButtonRightPos,
+          bottom: '20px',
+          zIndex: 3,
+        }}
+        className={floatingActionButtonClass}
+        disabled={!changed}
+        onClick={() => saveContent()}
+        color="primary"
+        aria-label="add"
+        data-testid="save-content"
+      >
+        <CheckIcon />
+      </Fab>
+      {savedOnce && !changed && (
+        <span
+          data-testid="save-status"
+          style={{ position: 'fixed', right: actionButtonRightPos + 60, bottom: '28px', zIndex: 3, fontSize: '12px', opacity: 0.6 }}
+        >
+          Saved
+        </span>
+      )}
+    </>
   );
 
     const meta: FormMeta = {

@@ -20,6 +20,10 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
 
+  /* Stop after first failure so globalTeardown always runs before the library
+     state gets further corrupted by subsequent tests running against dirty state. */
+  bail: 1,
+
   /* Use single worker to prevent multiple Electron instances from conflicting */
   workers: 1,
 

@@ -397,7 +397,7 @@ const NewSiteDialog = ({
 
     // Cancel/Close button
     actions.push(
-      <Button key="close" color="primary" onClick={handleClose}>
+      <Button key="close" color="primary" onClick={handleClose} data-testid="close-dialog-button">
         {state.activeStep === finalStepIndex ? "Close" : "Cancel"}
       </Button>
     );
@@ -427,6 +427,7 @@ const NewSiteDialog = ({
             disabled={isCreateDisabled}
             onClick={handleCreateSite}
             color="primary"
+            data-testid="confirm-import"
           >
             {state.isCreating ? "Creating..." : buttonText}
           </Button>
