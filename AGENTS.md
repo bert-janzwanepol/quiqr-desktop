@@ -31,6 +31,12 @@ npm run test -w @quiqr/frontend
 npm run test -w @quiqr/adapter-electron
 npm run test -w @quiqr/adapter-standalone
 
+# E2E Testing (Playwright)
+npm run test:e2e                # Run all E2E tests
+npm run test:e2e:ui             # Interactive UI mode
+npm run test:e2e:debug          # Debug mode
+npm run test:e2e:headed         # Run with visible browser
+
 # Documentation (Docusaurus)
 npm run start -w @quiqr/docs    # Dev server with hot reload
 npm run build -w @quiqr/docs    # Production build (validates links)
