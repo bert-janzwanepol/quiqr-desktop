@@ -32,11 +32,19 @@ export const test = base.extend<ElectronFixtures>({
       const proc = electronApp.process();
       if (proc && !proc.killed) {
         proc.kill('SIGKILL');
+        // Wait for the OS process to fully exit. Once it does, the CDP WebSocket
+        // gets a close event and Playwright drains its internal state — without
+        // this wait the dangling close() promise keeps the event loop alive and
+        // causes a "Worker teardown timeout" even though all tests passed.
+        await new Promise<void>(resolve => {
+          if (proc.exitCode !== null) resolve();
+          else proc.once('exit', resolve);
+        });
       }
     } catch {
       // process() throws if the app already exited cleanly — nothing to do
     }
-  }, { timeout: 15000 }],
+  }, { timeout: 30000 }],
 
 mainWindow: async ({ electronApp }, use) => {
   const mainWindow = await electronApp.firstWindow();
